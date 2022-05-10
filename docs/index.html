@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KERMIT V2.0 &mdash; KERMIT 2.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script async="async" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="#" class="icon icon-home"> KERMIT
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">KERMIT V2.0</a></li>
+<li><a class="reference internal" href="#kermit-structure-encoders">kerMIT structure encoders</a><ul>
+<li><a class="reference internal" href="#module-kerMIT.structenc.dse">Distributed Structure Embedder (DSE)</a></li>
+<li><a class="reference internal" href="#module-kerMIT.structenc.dte">Distributed Tree Embedder (DTE)</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">KERMIT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home"></a> &raquo;</li>
+      <li>KERMIT V2.0</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-kerMIT">
+<span id="kermit-v2-0"></span><h1>KERMIT V2.0<a class="headerlink" href="#module-kerMIT" title="Permalink to this headline"></a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<p>This is the KERMIT - described as a whole in <a class="reference external" href="https://aclanthology.org/2020.emnlp-main.18/">our EMNLP2020 paper</a>.</p>
+<figure class="align-center" id="fig-kermit">
+<a class="reference external image-reference" href="../../_static/_img/KermitPlusTranformer.png"><img alt="KERMIT architecture" src="_images/KermitPlusTranformer.png" style="width: 354.0px; height: 347.5px;" /></a>
+<figcaption>
+<p><span class="caption-text">KERMIT architecture</span><a class="headerlink" href="#fig-kermit" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</section>
+<section id="kermit-structure-encoders">
+<h1>kerMIT structure encoders<a class="headerlink" href="#kermit-structure-encoders" title="Permalink to this headline"></a></h1>
+<figure class="align-center" id="fig-kermit-dse">
+<a class="reference external image-reference" href="../../_static/_img/KermitDSE.png"><img alt="KERMIT's Generic Distributed Structure Encoder" src="_images/KermitDSE.png" style="width: 246.5px; height: 140.0px;" /></a>
+<figcaption>
+<p><span class="caption-text">KERMIT’s Generic Distributed Structure Encoder</span><a class="headerlink" href="#fig-kermit-dse" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+<section id="module-kerMIT.structenc.dse">
+<span id="distributed-structure-embedder-dse"></span><h2>Distributed Structure Embedder (DSE)<a class="headerlink" href="#module-kerMIT.structenc.dse" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="kerMIT.structenc.dse.DSE">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kerMIT.structenc.dse.</span></span><span class="sig-name descname"><span class="pre">DSE</span></span><a class="headerlink" href="#kerMIT.structenc.dse.DSE" title="Permalink to this definition"></a></dt>
+<dd><p>Distributed Structure Embedder (DSE): this is the abstract class for all the structure embedders.</p>
+<p>Given a structure <span class="math notranslate nohighlight">\(s\)</span>, the main aim of a DSE is to  produce its embedding <span class="math notranslate nohighlight">\(\vec{s} \in R^d\)</span>
+in a reduced space <span class="math notranslate nohighlight">\(R^d\)</span> which represents <span class="math notranslate nohighlight">\(s\)</span> by its substrucures.
+This is obtained by obtaining <span class="math notranslate nohighlight">\(\vec{s} \in R^d\)</span> as a weighted sum of
+all the substructures <span class="math notranslate nohighlight">\(\sigma\)</span> foreseen in <span class="math notranslate nohighlight">\(S(s)\)</span>
+according to the specific structure embedder:</p>
+<div class="math notranslate nohighlight" id="equation-main">
+<span class="eqno">(1)<a class="headerlink" href="#equation-main" title="Permalink to this equation"></a></span>\[\vec{s} = \sum_{\sigma \in S(s)} \omega_\sigma W\vec{e}_{\sigma} = \sum_{\sigma \in S(s)} \omega_\sigma \vec{\sigma} = W\sum_{\sigma \in S(s)} \omega_\sigma \vec{e}_{\sigma} = W\vec{e_{s}}\]</div>
+<p>where <span class="math notranslate nohighlight">\(W\)</span> is the embedding matrix, <span class="math notranslate nohighlight">\(\vec{e}_{\sigma}\)</span> is the one-hot vector of
+the substructure <span class="math notranslate nohighlight">\(\sigma\)</span> in the space <span class="math notranslate nohighlight">\(R^n\)</span>, <span class="math notranslate nohighlight">\(\omega_{\sigma}\)</span> is the scalar weight
+of the substructure <span class="math notranslate nohighlight">\(\sigma\)</span>, <span class="math notranslate nohighlight">\(\vec{\sigma}\)</span> is the vector representing
+the structure <span class="math notranslate nohighlight">\(\sigma\)</span> in the smaller space <span class="math notranslate nohighlight">\(\vec{\sigma} = W\vec{e}_{\sigma}\in R^d\)</span>,
+and  <span class="math notranslate nohighlight">\(\vec{e_{s}} = \sum_{\sigma \in S(s)} \omega_{\sigma}\vec{e_{\sigma}}\)</span> is the vector representing
+the initial structure <span class="math notranslate nohighlight">\(s\)</span> in the space <span class="math notranslate nohighlight">\(R^n\)</span>.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="kerMIT.structenc.dse.DSE.ds">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">structure</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kerMIT.structenc.dse.DSE.ds" title="Permalink to this definition"></a></dt>
+<dd><p>given a structure <span class="math notranslate nohighlight">\(s\)</span>, produces the embedding <span class="math notranslate nohighlight">\(\vec{s} \in R^d\)</span> (see Equation <a class="reference internal" href="#equation-main">(1)</a>).
+This is generally obtained recursively on the components of the structure
+plus a composing operation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>structure</strong> – this is the structure <span class="math notranslate nohighlight">\(s\)</span> that has to be decomposed in substructures.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><span class="math notranslate nohighlight">\(\vec{s}\)</span> which is an Array or a Tensor according to the implementation.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kerMIT.structenc.dse.DSE.dsf">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dsf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">structure</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kerMIT.structenc.dse.DSE.dsf" title="Permalink to this definition"></a></dt>
+<dd><p>given a structure <span class="math notranslate nohighlight">\(\sigma\)</span>, it produces the vector <span class="math notranslate nohighlight">\(\vec{\sigma} = W\vec{e}_{\sigma}\in R^d\)</span>
+representing that single structure in the embedding space <span class="math notranslate nohighlight">\(R^d\)</span> (see Equation <a class="reference internal" href="#equation-main">(1)</a>).
+This is generally obtained recursively on the components of the structure
+plus a composing operation .</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>structure</strong> – this is the structure <span class="math notranslate nohighlight">\(\sigma\)</span> that has to be transformed in a vector representing only that structure.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><span class="math notranslate nohighlight">\(\vec{\sigma}\)</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kerMIT.structenc.dse.DSE.dsf_with_weight">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dsf_with_weight</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">structure</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kerMIT.structenc.dse.DSE.dsf_with_weight" title="Permalink to this definition"></a></dt>
+<dd><p>given a structure <span class="math notranslate nohighlight">\(\sigma\)</span>, it produces the vector <span class="math notranslate nohighlight">\(\vec{\sigma}\)</span> representing that single structure
+in the embedding space <span class="math notranslate nohighlight">\(R^d\)</span> and its weight <span class="math notranslate nohighlight">\(\omega_{\sigma}\)</span> (see Equation <a class="reference internal" href="#equation-main">(1)</a>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>structure</strong> – this is the structure that has to be transformed in a vector representing only that structure.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>(<span class="math notranslate nohighlight">\(\vec{\sigma}\)</span>, <span class="math notranslate nohighlight">\(\omega_{\sigma}\)</span>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kerMIT.structenc.dse.DSE.substructures">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">substructures</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">structure</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kerMIT.structenc.dse.DSE.substructures" title="Permalink to this definition"></a></dt>
+<dd><p>it produces all the substructures of <span class="math notranslate nohighlight">\(s\)</span> foreseen according to the specific structure embedder, that is,
+<span class="math notranslate nohighlight">\(S(s)\)</span> (see Equation <a class="reference internal" href="#equation-main">(1)</a>)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>structure</strong> – this is the structure where substructure are extracted from.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><span class="math notranslate nohighlight">\(S(s)\)</span> as a list</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-kerMIT.structenc.dte">
+<span id="distributed-tree-embedder-dte"></span><h2>Distributed Tree Embedder (DTE)<a class="headerlink" href="#module-kerMIT.structenc.dte" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="kerMIT.structenc.dte.DTE">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">kerMIT.structenc.dte.</span></span><span class="sig-name descname"><span class="pre">DTE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">LAMBDA=1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimension=4096</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">operation=&lt;function</span> <span class="pre">fast_shuffled_convolution&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kerMIT.structenc.dte.DTE" title="Permalink to this definition"></a></dt>
+<dd><dl>
+<dt>The Distributed Tree Encoder is applied to trees</dt><dd><p>and represents trees in the space of subtrees as defined
+in <a class="reference external" href="https://dl.acm.org/doi/10.5555/2980539.2980621">Duffy&amp;Collins (2001)</a>
+by means of reduced vectors. It has been firstly implemented
+in the <a class="reference external" href="https://dl.acm.org/doi/10.5555/3042573.3042592">Distributed Tree Kernels, ICML 2012 Zanzotto&amp;Dell’Arciprete</a>.</p>
+<p>Let define trees as the root label <span class="math notranslate nohighlight">\(r\)</span> and the list of its subtrees:</p>
+<div class="math notranslate nohighlight">
+\[\sigma = (r,[t_1,...,t_k])\]</div>
+<p>where <span class="math notranslate nohighlight">\(t_i\)</span> are trees. Leaves have an empty list of subtrees.
+Terms of Equation <a class="reference internal" href="#equation-main">(1)</a> are then the following:</p>
+<p>1. <span class="math notranslate nohighlight">\(\vec{\sigma} = \Phi(\sigma) =
+\begin{cases} \vec{r} &amp; \text{if } \sigma \text{ is a leaf}\\ (\vec{r} \circ (\Phi(t_1) \circ \ldots \circ \Phi(t_n)))
+&amp; \text{otherwise}\end{cases}\)</span> where <span class="math notranslate nohighlight">\(\vec{r}\)</span> is the vector associated to the label of <span class="math notranslate nohighlight">\(r\)</span> and <span class="math notranslate nohighlight">\(\circ\)</span> is the chosen vector composition operation;</p>
+<p>2. <span class="math notranslate nohighlight">\(\omega_\sigma = \sqrt \lambda^n\)</span> where <span class="math notranslate nohighlight">\(\lambda\)</span> is the factor penalizing large subtrees
+and <span class="math notranslate nohighlight">\(n\)</span> is the number  of nodes of the subtree <span class="math notranslate nohighlight">\(\sigma\)</span></p>
+<p>3. <span class="math notranslate nohighlight">\(S(t)\)</span> is the set containing the relevant subtrees of <span class="math notranslate nohighlight">\(t\)</span> where a relevant subtree <span class="math notranslate nohighlight">\(\sigma\)</span> of <span class="math notranslate nohighlight">\(t\)</span>
+is any subtree rooted in any node of <span class="math notranslate nohighlight">\(t\)</span> with the only constraint that, if a node of  is contained in the subtree,
+all the siblings of this node in the initial tree have to be in the subtree</p>
+<p>To keep things simple, terms of Equation <a class="reference internal" href="#equation-main">(1)</a> are also presented with a running example.
+Given a tree in the classical parenthetical form:</p>
+<p><code class="docutils literal notranslate"><span class="pre">(NP</span> <span class="pre">(DT</span> <span class="pre">the)</span> <span class="pre">(JJ)</span> <span class="pre">(NN</span> <span class="pre">ball))</span></code></p>
+<p><span class="math notranslate nohighlight">\(\vec{\sigma}\)</span> is obtained by transforming node labels in the related
+vectors and  by putting the operation <span class="math notranslate nohighlight">\(\circ\)</span> instead of blanks:</p>
+<div class="math notranslate nohighlight">
+\[\vec{\sigma} = (\vec{NP} \circ (\vec{DT} \circ \vec{the}) \circ (\vec{JJ})\circ (\vec{NN} \circ \vec{ball}))\]</div>
+<p>This is an example of construction of the <span class="math notranslate nohighlight">\(S(t)\)</span> for a very simple tree (taken from Moschitti’s personal page in Trento):</p>
+</dd>
+</dl>
+<figure class="align-center" id="fig-tk">
+<a class="reference external image-reference" href="../../_static/_img/TK_Moschitti.gif"><img alt="Tree Kernel Space" src="_images/TK_Moschitti.gif" style="width: 228.5px; height: 121.0px;" /></a>
+</figure>
+<blockquote>
+<div><dl class="field-list simple">
+<dt class="field-odd">param LAMBDA</dt>
+<dd class="field-odd"><p>the penalizing factor <span class="math notranslate nohighlight">\(\lambda\)</span> for large subtrees</p>
+</dd>
+<dt class="field-even">param dimension</dt>
+<dd class="field-even"><p>the dimension <span class="math notranslate nohighlight">\(d\)</span> of the embedding space <span class="math notranslate nohighlight">\(R^d\)</span></p>
+</dd>
+<dt class="field-odd">param operation</dt>
+<dd class="field-odd"><p>the basic operation <span class="math notranslate nohighlight">\(\circ\)</span> for composing two vectors</p>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="py method">
+<dt class="sig sig-object py" id="kerMIT.structenc.dte.DTE.ds">
+<span class="sig-name descname"><span class="pre">ds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kerMIT.structenc.dte.DTE.ds" title="Permalink to this definition"></a></dt>
+<dd><p>This general method is implemented by dt(tree)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kerMIT.structenc.dte.DTE.dsf">
+<span class="sig-name descname"><span class="pre">dsf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kerMIT.structenc.dte.DTE.dsf" title="Permalink to this definition"></a></dt>
+<dd><p>given a structure <span class="math notranslate nohighlight">\(\sigma\)</span>, it produces the vector <span class="math notranslate nohighlight">\(\vec{\sigma} = W\vec{e}_{\sigma}\in R^d\)</span>
+representing that single structure in the embedding space <span class="math notranslate nohighlight">\(R^d\)</span> (see Equation <a class="reference internal" href="#equation-main">(1)</a>).
+This is generally obtained recursively on the components of the structure
+plus a composing operation .</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>structure</strong> – this is the structure <span class="math notranslate nohighlight">\(\sigma\)</span> that has to be transformed in a vector representing only that structure.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><span class="math notranslate nohighlight">\(\vec{\sigma}\)</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kerMIT.structenc.dte.DTE.dsf_with_weight">
+<span class="sig-name descname"><span class="pre">dsf_with_weight</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kerMIT.structenc.dte.DTE.dsf_with_weight" title="Permalink to this definition"></a></dt>
+<dd><p>given a structure <span class="math notranslate nohighlight">\(\sigma\)</span>, it produces the vector <span class="math notranslate nohighlight">\(\vec{\sigma}\)</span> representing that single structure
+in the embedding space <span class="math notranslate nohighlight">\(R^d\)</span> and its weight <span class="math notranslate nohighlight">\(\omega_{\sigma}\)</span> (see Equation <a class="reference internal" href="#equation-main">(1)</a>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>structure</strong> – this is the structure that has to be transformed in a vector representing only that structure.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>(<span class="math notranslate nohighlight">\(\vec{\sigma}\)</span>, <span class="math notranslate nohighlight">\(\omega_{\sigma}\)</span>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kerMIT.structenc.dte.DTE.dt">
+<span class="sig-name descname"><span class="pre">dt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kerMIT.structenc.dte.DTE.dt" title="Permalink to this definition"></a></dt>
+<dd><p>takes as input a tree and produces</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>tree</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kerMIT.structenc.dte.DTE.dtf_and_weight">
+<span class="sig-name descname"><span class="pre">dtf_and_weight</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kerMIT.structenc.dte.DTE.dtf_and_weight" title="Permalink to this definition"></a></dt>
+<dd><p>given a tree <span class="math notranslate nohighlight">\(\sigma\)</span> produces the pair <span class="math notranslate nohighlight">\((\vec{\sigma},\omega_\sigma)\)</span>:</p>
+<blockquote>
+<div><blockquote>
+<div><ol class="arabic simple">
+<li><p><span class="math notranslate nohighlight">\(\vec{\sigma} = \Phi(\sigma) = \begin{cases} \vec{r} &amp; \text{if } \sigma \text{ is a leaf}\\ (\vec{r} \circ (\Phi(t_1) \circ \ldots \circ \Phi(t_n)))  &amp; \text{otherwise}\end{cases}\)</span> where <span class="math notranslate nohighlight">\(\vec{r}\)</span> is the vector associated to the label of <span class="math notranslate nohighlight">\(r\)</span> and <span class="math notranslate nohighlight">\(\circ\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(\omega_\sigma = \sqrt \lambda^n\)</span> where <span class="math notranslate nohighlight">\(\lambda\)</span> is the factor penalizing large subtrees and <span class="math notranslate nohighlight">\(n\)</span> is the number  of nodes of the subtree <span class="math notranslate nohighlight">\(\sigma\)</span></p></li>
+</ol>
+</div></blockquote>
+<p>Examples in the general description of the class.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>tree</strong> – <span class="math notranslate nohighlight">\(\sigma\)</span>, which is a Tree</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><span class="math notranslate nohighlight">\((\vec{\sigma},\omega_\sigma)\)</span>, which is a vector (Array or Tensor) and a scalar</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kerMIT.structenc.dte.DTE.substructures">
+<span class="sig-name descname"><span class="pre">substructures</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kerMIT.structenc.dte.DTE.substructures" title="Permalink to this definition"></a></dt>
+<dd><p>it produces all the substructures of <span class="math notranslate nohighlight">\(s\)</span> foreseen according to the specific structure embedder, that is,
+<span class="math notranslate nohighlight">\(S(s)\)</span> (see Equation <a class="reference internal" href="#equation-main">(1)</a>)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>structure</strong> – this is the structure where substructure are extracted from.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><span class="math notranslate nohighlight">\(S(s)\)</span> as a list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="kerMIT.structenc.dte.DTE.subtrees">
+<span class="sig-name descname"><span class="pre">subtrees</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#kerMIT.structenc.dte.DTE.subtrees" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>tree</strong> – tree in parienthetic form</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>all subtrees</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+<section id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline"></a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Fabio Massimo Zanzotto, Leonardo Ranaldi, Dario Onorati, Andrea Santilli.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

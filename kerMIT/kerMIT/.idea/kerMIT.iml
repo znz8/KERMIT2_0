@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module version="4">
+  <component name="NewModuleRootManager">
+    <orderEntry type="jdk" jdkName="Python 3.8 (NNeuralAttepmt)" jdkType="Python SDK" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+  <component name="ReSTService">
+    <option name="DOC_DIR" value="$MODULE_DIR$" />
+  </component>
+</module>

@@ -1,0 +1,68 @@
+
+
+
+		
+├── /examples                        
+│   └── /Notebooks       
+│       ├── /scripts                 
+│       ├── KERMIT_encoder.ipynb     
+│       ├── KERMIT_training.ipynb    
+│       ├── KERMITviz.ipynb          
+│       ├── KERMITviz_Colab.ipynb    
+│       └── README.md                
+│
+├── /img                             
+├── LICENSE                          
+├── README.md    
+│
+│
+│                   
+├── /kerMIT                          
+│      ├── altro........                           
+│      └── /kerMIT     
+│            ├── __init__.py                
+│            ├── dtk.py     
+│            ├── dtk2_deprecated.py                        ----------> (leo) CESTINO!
+│            ├── operation.py    
+│            ├── pennTreeToMatrix.py          
+│            ├── sentence_encoder.py
+│            ├── tree_encode.py
+│            ├── tree.py
+│            ├── treekernel.py
+│            │
+│            ├── /explain                                  ---------> (leo) come riorganizzare?          
+│            │      ├── __init__.py                 
+│            │      ├── activationSubtreeLRP.py     
+│            │      ├── kerMITviz.py   
+│            │      ├── LRP_linear_layer.py          
+│            │      └── modelToExplain.py   
+│            │
+│            │
+│            ├── /utils                       
+│            │      ├── __init__.py                 
+│            │      ├── activation_visualizer.py    
+│            │      ├── tree_visualizer.py            
+│            │      └── visualizer.py
+│            │
+│            │
+│            ├── /samples                               ---------> (leo) come riorganizzare?
+│            │      ├── __init__.py                 
+│            │      ├── models.py     
+│            │      ├── tree_encode.py   
+│            │      └── utils.py  
+│            │
+│            │
+│            ├── /js_visualizer                             -------------> (leo) visualizzatore in js    
+│            │      ├── .....                   
+│            │      └── altro per visualizzare  
+│            │
+│            │
+│            ├── /structenc                             -------------> (leo) come deve essere fatta?    
+│            │      ├── __init__.py                   
+                    └── ds.py  
+
+
+
+
+
+
