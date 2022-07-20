@@ -75,20 +75,32 @@
 <span id="kermit-v2-0"></span><h1>KERMIT V2.0<a class="headerlink" href="#module-kerMIT" title="Permalink to this headline"></a></h1>
 <div class="toctree-wrapper compound">
 </div>
-<p>This is the KERMIT - described as a whole in <a class="reference external" href="https://aclanthology.org/2020.emnlp-main.18/">our EMNLP2020 paper</a>.</p>
+<p>Welcome to the KERMIT code documentation.
+KERMIT has been introduced in  <a class="reference external" href="https://aclanthology.org/2020.emnlp-main.18/">our EMNLP2020 paper</a>, although it has a longer history.</p>
+<p>KERMIT aims to  collaborate with other Neural Networks (for example, with Transformers) for exploiting structures in decision making and</p>
 <figure class="align-center" id="fig-kermit">
 <a class="reference external image-reference" href="../../_static/_img/KermitPlusTranformer.png"><img alt="KERMIT architecture" src="_images/KermitPlusTranformer.png" style="width: 354.0px; height: 347.5px;" /></a>
 <figcaption>
 <p><span class="caption-text">KERMIT architecture</span><a class="headerlink" href="#fig-kermit" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
+<p>and for explaining how decisions are made using structures:</p>
+<figure class="align-center" id="fig-kermit-explaination">
+<a class="reference external image-reference" href="../../_static/_img/Teaser.png"><img alt="KERMIT architecture" src="_images/KermitInterpretationPass.png" style="width: 246.5px; height: 102.0px;" /></a>
+<figcaption>
+<p><span class="caption-text">KERMIT Explanation Pass</span><a class="headerlink" href="#fig-kermit-explaination" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
 </section>
 <section id="kermit-structure-encoders">
 <h1>kerMIT structure encoders<a class="headerlink" href="#kermit-structure-encoders" title="Permalink to this headline"></a></h1>
+<p>This package contains the Distributed Structure Encoders.
+These are responsible for taking structured data and producing vectors
+that are representing these structured data as their substructures in a reduced space (see the following figure).</p>
 <figure class="align-center" id="fig-kermit-dse">
 <a class="reference external image-reference" href="../../_static/_img/KermitDSE.png"><img alt="KERMIT's Generic Distributed Structure Encoder" src="_images/KermitDSE.png" style="width: 246.5px; height: 140.0px;" /></a>
 <figcaption>
-<p><span class="caption-text">KERMIT’s Generic Distributed Structure Encoder</span><a class="headerlink" href="#fig-kermit-dse" title="Permalink to this image"></a></p>
+<p><span class="caption-text">KERMIT’s Generic Distributed Structure Encoder (or Embedder, what do you prefer?)</span><a class="headerlink" href="#fig-kermit-dse" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
 <section id="module-kerMIT.structenc.dse">
