@@ -1,3 +1,5 @@
+import gc
+
 from kerMIT.structenc.dse import DSE
 from kerMIT.structenc.dte import DTE
 import kerMIT.operation as op
@@ -5,16 +7,43 @@ from kerMIT.tree import Tree
 import numpy as np
 
 
-class partialTreeKernel(DTE):
+class partialTreeKernel(DSE):
     def __init__(self, LAMBDA=1., MU=1., dimension=4096, operation=op.fast_shuffled_convolution, terminal_factor=1.):
-        super(partialTreeKernel, self).__init__(LAMBDA=LAMBDA, dimension=dimension, operation=operation)
-        print('using partial')
-
+        self.LAMBDA = LAMBDA
+        self.dimension = dimension
+        self.operation = operation
+        self.sn_cache = {}
+        self.dt_cache = {}
+        self.dtf_cache = {}
+        self.random_cache = {}
+        self.result = np.zeros(self.dimension)
         self.spectrum = np.zeros(self.dimension)
 
         self.__set_terminal_factor(terminal_factor)
         # TODO perche' MAXPOWER non e' parametrico? anche su java e' 10
         self.__set_mu(MU, MAX_POWER=10)
+
+    def cleanCache(self):
+        self.sn_cache = {}
+        self.dt_cache = {}
+        self.dtf_cache = {}
+        self.random_cache = {}
+        gc.collect()
+
+    def distributedVector(self, s):
+        if s in self.random_cache:
+            return self.random_cache[s]
+        # h = int(hashlib.md5(s.encode()).hexdigest(),16) % 100000000              #probably too slow and not necessary ??
+        # h = abs(mmh3.hash(s)) % 1000000
+
+        h = abs(op.hash(s)) % 4294967295
+
+        # h = np.abs(hash(s))         #devo hashare s in qualche modo (controllare che basti) e
+        np.random.seed(h)            #inizializzare np.random.seed()
+        v_ = op.random_vector(self.dimension,normalized=False)
+        self.random_cache[s] = v_
+        return v_
+
 
     def __set_terminal_factor(self, terminal_factor=1.0):
         self._terminal_factor = np.sqrt(terminal_factor)
@@ -36,26 +65,34 @@ class partialTreeKernel(DTE):
         else:
             return self._mu ** exp
 
-    def sRecursive(self, node: Tree):
+    def sRecursive(self, node: Tree, store_substructures=False):
         """Recursive computation of function s(n) for the root of the input tree.
         s(n) sums all of the tree fragments rooted in n.
         :param node: the input tree
         :return s(node): sum of all of the tree fragments rooted in node
         """
         v = self.distributedVector(node.root)
+        penalizing_value = 1
 
-        #print(f"at node {node}, before d(children) value of spectrum{self.spectrum}")
-        # TODO non sembra mai lessicalizzato
+        # TODO non sembra mai non lessicalizzato
         if node.isTerminal():
-            result = (self._mu * self._terminal_factor) * v
+            penalizing_value = self._mu * self._terminal_factor
+            result = penalizing_value * v
         else:
             result = self._mu * v + self.operation(v,
                                                    self.operation(
                                                        self.distributedVector("separator"), self.d(node.children)
                                                    ))
         #print(f"at node {node}, after d(children) value of spectrum{self.spectrum}")
-        result = np.sqrt(self.LAMBDA) * result
+        # TODO quale e' qui il penalizing_value? lambda non entra mai nella def del peso? non e' che e' mu per lamda come sopra?
+        penalizing_value = penalizing_value * np.sqrt(self.LAMBDA)
+        result = penalizing_value * result
+
         self.spectrum = self.spectrum + result
+        print(node, result)
+        if store_substructures:
+            self.dtf_cache[node] = (result, penalizing_value)
+
         return result
 
     def d(self, trees):
@@ -85,9 +122,7 @@ class partialTreeKernel(DTE):
         :param dvalues: the map used for dynamic programming
         :return d(c_i):
         """
-        # TODO gestione hash oscura, perche' la key e' l'indice del figlio?
         if k in dvalues:
-            print(f'k = {k} , trees[k] == {trees[k]}')
             return dvalues[k]
 
         s_trees_k = self.sRecursive(trees[k])
@@ -105,10 +140,54 @@ class partialTreeKernel(DTE):
         dvalues[k] = result
         return result
 
-    def dt(self, tree):
+    def ds(self, tree):
+        return self.dpt(tree)
+
+    def dpt(self, tree):
         self.spectrum = np.zeros(self.dimension)
         self.sRecursive(tree)
         return self.spectrum
+
+    def dsf_with_weight(self, structure):
+        self.spectrum = np.zeros(self.dimension)
+        self.dtf_cache= {}
+        self.sRecursive(structure, store_substructures=True)
+        return self.dtf_cache[structure]
+
+    # TODO delete
+    def dptf_and_weight(self, tree):
+        node = tree
+        if node in self.dtf_cache:
+            return self.dtf_cache[node]
+
+        v = self.distributedVector(node.root)
+        if node.isTerminal():
+            penalizing_value = self._mu * self._terminal_factor * self.LAMBDA
+            result = penalizing_value * v
+
+            self.dtf_cache[tree] = (result, penalizing_value)
+
+        else:
+            result = self._mu * v + self.operation(v,
+                                                   #TODO
+                                                   self.operation(
+                                                       self.distributedVector("separator"), self.d(node.children)
+                                                   ))
+            self.dtf_cache[tree] = (result, self._mu)
+
+        return self.dtf_cache[tree]
+
+
+    # TODO
+    def dsf(self, structure):
+        return self._dptf(structure)
+
+    def _dptf(self, structure):
+        raise NotImplemented('TODO')
+
+    def substructures(self, structure):
+        raise NotImplemented('TODO')
+
 
 if __name__ == "__main__":
     ss = "(NP (DT The) (JJ wonderful) (NN time))"
@@ -116,9 +195,16 @@ if __name__ == "__main__":
     t = Tree(string=ss)
 
     kernel = partialTreeKernel(dimension=8192, LAMBDA=0.6, operation=op.fast_shuffled_convolution)
+
     v = kernel.sRecursive(t)
-    w1 = kernel.dt(t)
+    w1 = kernel.ds(t)
+    w2, ww = kernel.dptf_and_weight(t)
+
+    print(np.dot(w1, w1))
     print(v)
     print(w1)
+    print(w2)
+
+
 
     #print(kernel.kernel(t,frag))
