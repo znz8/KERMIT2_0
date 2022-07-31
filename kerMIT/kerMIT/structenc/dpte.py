@@ -1,7 +1,6 @@
 import gc
 
 from kerMIT.structenc.dse import DSE
-from kerMIT.structenc.dte import DTE
 import kerMIT.operation as op
 from kerMIT.tree import Tree
 import numpy as np
@@ -39,11 +38,10 @@ class partialTreeKernel(DSE):
         h = abs(op.hash(s)) % 4294967295
 
         # h = np.abs(hash(s))         #devo hashare s in qualche modo (controllare che basti) e
-        np.random.seed(h)            #inizializzare np.random.seed()
-        v_ = op.random_vector(self.dimension,normalized=False)
+        np.random.seed(h)  # inizializzare np.random.seed()
+        v_ = op.random_vector(self.dimension, normalized=False)
         self.random_cache[s] = v_
         return v_
-
 
     def __set_terminal_factor(self, terminal_factor=1.0):
         self._terminal_factor = np.sqrt(terminal_factor)
@@ -79,23 +77,22 @@ class partialTreeKernel(DSE):
             penalizing_value = self._mu * self._terminal_factor
             result = penalizing_value * v
         else:
-            result = self._mu * v + self.operation(v,
-                                                   self.operation(
-                                                       self.distributedVector("separator"), self.d(node.children)
-                                                   ))
-        #print(f"at node {node}, after d(children) value of spectrum{self.spectrum}")
-        # TODO quale e' qui il penalizing_value? lambda non entra mai nella def del peso? non e' che e' mu per lamda come sopra?
+            result = self._mu * v + self.operation(v, self.operation(
+                self.distributedVector("separator"),
+                self.d(node.children, store_substructures)))
+
+        # TODO quale e' qui il penalizing_value? mu non entra mai nella def del peso?
         penalizing_value = penalizing_value * np.sqrt(self.LAMBDA)
         result = penalizing_value * result
 
         self.spectrum = self.spectrum + result
-        print(node, result)
+
         if store_substructures:
             self.dtf_cache[node] = (result, penalizing_value)
 
         return result
 
-    def d(self, trees):
+    def d(self, trees, store_substructures=False):
         """
         Computation of D(trees)
         D(trees) sums all of the tree fragment forests rooted in any subset of nodes in c, to be attached to the parent node.
@@ -107,13 +104,13 @@ class partialTreeKernel(DSE):
         dvalues = {}
 
         result = np.zeros(self.dimension)
-        # TODO sono pensati in parallelo o in sequenza? si puo fare la somma 1! volta e risolvere anche il dubbio su spectrum
         for k, c in enumerate(trees):
-            result = result + self.__dRecursive(trees, k, dvalues) #spectrum passato originariamente qui
+            result = result + self.__dRecursive(trees, k, dvalues,
+                                                store_substructures)  # spectrum passato originariamente qui
 
         return result
 
-    def __dRecursive(self, trees, k, dvalues):
+    def __dRecursive(self, trees, k, dvalues, store_substructures=False):
         """
         Computation of d(c_i). Dynamic programming is used for efficiency reasons.
         d(c_i) sums all the tree fragment forests rooted in c_i and any subset of nodes in c following c_i.
@@ -125,15 +122,13 @@ class partialTreeKernel(DSE):
         if k in dvalues:
             return dvalues[k]
 
-        s_trees_k = self.sRecursive(trees[k])
-
+        s_trees_k = self.sRecursive(trees[k], store_substructures)
         if k < len(trees) - 1:
-            total = self.__dRecursive(trees, k + 1, dvalues)
+            total = self.__dRecursive(trees, k + 1, dvalues, store_substructures)
             for i in range(k + 2, len(trees)):
-                total = total + self._mus[i - k - 1] * self.__dRecursive(trees, i, dvalues)
+                total = total + self._mus[i - k - 1] * self.__dRecursive(trees, i, dvalues, store_substructures)
 
             result = s_trees_k + self.operation(s_trees_k, total)
-
         else:
             result = s_trees_k
 
@@ -148,43 +143,83 @@ class partialTreeKernel(DSE):
         self.sRecursive(tree)
         return self.spectrum
 
-    def dsf_with_weight(self, structure):
+    # TODO delete? impl diretta in java... ma memo substructs
+    def dpt_v2(self, tt: Tree):
+        result = np.zeros(self.dimension)
+        for n in tt.allNodes():
+            result += self.sRecursive(n, store_substructures=True)
+        return result
+
+    def dsf(self, structure: Tree, original: Tree):
+        return self.dsf_with_weight(structure, original)[0]
+
+    def dsf_with_weight(self, structure: Tree, original: Tree):
+        superTree = self.findSuperTree(structure, original)
+
+        if superTree is None:
+            raise ValueError("Fragment not found in originary tree!")
+
+        if structure.isTerminal():
+            # In this case, return value will be mistakenly multiplied by lambdaSq,
+            # so it must be divided by lambdaSq to compensate
+            penalizing_value = np.sqrt(self.LAMBDA) * self._mu
+            result = penalizing_value * self.distributedVector(structure.root)
+        else:
+            #The composition order is different from the one of the classic DTK, it is n#(c1#(c2#...#(cn-1#cn)...))
+            result, penalizing_value = self.dsf_with_weight(structure.children[len(structure.children)-1], superTree)
+            for i in range(len(structure.children)-2, -1, -1):
+                result = self.operation(
+                    self.dsf_with_weight(structure.children[i], superTree)[0],
+                    result
+                )
+
+            penalizing_value = np.sqrt(self.LAMBDA)
+            result = penalizing_value * self.operation(self.distributedVector(structure.root), result)
+
+        return (result, penalizing_value)
+
+    def findSuperTree(self, fragment: Tree, whole: Tree):
+        if self.isSuperTree(fragment, whole):
+            return whole
+
+        superTree = None
+        if not whole.isTerminal():
+            for c in whole.children:
+                if superTree is not None:
+                    if self.findSuperTree(fragment, c) is not None:
+                        raise Exception("Tree fragment may refer to multiple subtrees!")
+                else:
+                    superTree = self.findSuperTree(fragment, c)
+
+        return superTree
+
+    def isSuperTree(self, fragment: Tree, whole: Tree):
+        if fragment.root != whole.root:
+            return False
+
+        if fragment.isTerminal():
+            return True
+
+        i = -1
+        for c in fragment.children:
+            while True:
+                i += 1
+                if i >= len(whole.children):
+                    return False
+
+                if self.isSuperTree(c, whole.children[i]):
+                    break
+        return True
+
+    ## TODO implementazione diretta se dptf e' "parte" di tutto l'albero... non viene uguale a sopra
+    def dptf_with_weight_v2(self, structure: Tree, original: Tree):
         self.spectrum = np.zeros(self.dimension)
-        self.dtf_cache= {}
-        self.sRecursive(structure, store_substructures=True)
+        self.dtf_cache = {}
+
+        self.sRecursive(original, store_substructures=True)
         return self.dtf_cache[structure]
 
-    # TODO delete
-    def dptf_and_weight(self, tree):
-        node = tree
-        if node in self.dtf_cache:
-            return self.dtf_cache[node]
-
-        v = self.distributedVector(node.root)
-        if node.isTerminal():
-            penalizing_value = self._mu * self._terminal_factor * self.LAMBDA
-            result = penalizing_value * v
-
-            self.dtf_cache[tree] = (result, penalizing_value)
-
-        else:
-            result = self._mu * v + self.operation(v,
-                                                   #TODO
-                                                   self.operation(
-                                                       self.distributedVector("separator"), self.d(node.children)
-                                                   ))
-            self.dtf_cache[tree] = (result, self._mu)
-
-        return self.dtf_cache[tree]
-
-
     # TODO
-    def dsf(self, structure):
-        return self._dptf(structure)
-
-    def _dptf(self, structure):
-        raise NotImplemented('TODO')
-
     def substructures(self, structure):
         raise NotImplemented('TODO')
 
@@ -194,17 +229,34 @@ if __name__ == "__main__":
     ss = ss.replace(")", ") ").replace("(", " (")
     t = Tree(string=ss)
 
-    kernel = partialTreeKernel(dimension=8192, LAMBDA=0.6, operation=op.fast_shuffled_convolution)
+    kernel = partialTreeKernel(dimension=5, LAMBDA=0.6, operation=op.fast_shuffled_convolution)
+    (root_dptf, root_penalization) = kernel.dsf_with_weight(t.children[0], t)
 
-    v = kernel.sRecursive(t)
-    w1 = kernel.ds(t)
-    w2, ww = kernel.dptf_and_weight(t)
+    kernel = partialTreeKernel(dimension=5, LAMBDA=0.6, operation=op.fast_shuffled_convolution)
+    root_dptf_sRecursive = kernel.sRecursive(t)
 
-    print(np.dot(w1, w1))
-    print(v)
-    print(w1)
-    print(w2)
+    kernel = partialTreeKernel(dimension=5, LAMBDA=0.6, operation=op.fast_shuffled_convolution)
+    (root_dptf_2, root_penalization_2) = kernel.dptf_with_weight_v2(t.children[0], t)
 
+    kernel = partialTreeKernel(dimension=5, LAMBDA=0.6, operation=op.fast_shuffled_convolution)
+    dpt = kernel.ds(t)
 
+    kernel = partialTreeKernel(dimension=5, LAMBDA=0.6, operation=op.fast_shuffled_convolution)
+    dpt_2 = kernel.dpt_v2(t)
 
-    #print(kernel.kernel(t,frag))
+    print(root_dptf)
+    print(root_dptf_sRecursive)
+    print(root_dptf_2)
+
+    print()
+    print(dpt)
+    print(np.sum([kernel.dtf_cache[k][0] for k in kernel.dtf_cache], axis=0))
+    print("penalizing values ", [(k, kernel.dtf_cache[k][1]) for k in kernel.dtf_cache])
+    # print(kernel.kernel(t,frag))
+
+    """print()
+    print(t)
+    sub = t.children[0].children[0]
+    print(sub)
+    print(kernel.findSuperTree(sub, t))"""
+
