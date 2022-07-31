@@ -4,6 +4,7 @@ from kerMIT.structenc.dse import DSE
 import kerMIT.operation as op
 from kerMIT.tree import Tree
 import numpy as np
+import itertools as it
 
 
 class partialTreeKernel(DSE):
@@ -165,9 +166,9 @@ class partialTreeKernel(DSE):
             penalizing_value = np.sqrt(self.LAMBDA) * self._mu
             result = penalizing_value * self.distributedVector(structure.root)
         else:
-            #The composition order is different from the one of the classic DTK, it is n#(c1#(c2#...#(cn-1#cn)...))
-            result, penalizing_value = self.dsf_with_weight(structure.children[len(structure.children)-1], superTree)
-            for i in range(len(structure.children)-2, -1, -1):
+            # The composition order is different from the one of the classic DTK, it is n#(c1#(c2#...#(cn-1#cn)...))
+            result, penalizing_value = self.dsf_with_weight(structure.children[len(structure.children) - 1], superTree)
+            for i in range(len(structure.children) - 2, -1, -1):
                 result = self.operation(
                     self.dsf_with_weight(structure.children[i], superTree)[0],
                     result
@@ -219,29 +220,56 @@ class partialTreeKernel(DSE):
         self.sRecursive(original, store_substructures=True)
         return self.dtf_cache[structure]
 
-    # TODO
-    def substructures(self, structure):
-        raise NotImplemented('TODO')
+    def substructures(self, structure: Tree):
+        active_in_root, all = self.partialtrees(structure)
+        return all
+
+    def partialtrees(self, tree: Tree):
+        if tree.isPreTerminal():
+            return [Tree(root=tree.root), tree], []
+
+        # all combination of trees can
+        rooted_in_children = []
+        all_pt = []
+        for i in range(len(tree.children)):
+            rooted_in_c, other = self.partialtrees(tree.children[i])
+            rooted_in_children.append(rooted_in_c + [None])
+            all_pt.extend(other)
+            all_pt.extend(rooted_in_c)
+
+        active = []
+        for ptc in it.product(*rooted_in_children):
+            children = [x for x in ptc if x is not None]
+            if len(children) > 0:
+                active.append(Tree(root=tree.root, children=children))
+            else:
+                active.append(Tree(root=tree.root))
+
+        return active, all_pt
 
 
 if __name__ == "__main__":
     ss = "(NP (DT The) (JJ wonderful) (NN time))"
+    ss = '(NOTYPE##ROOT(NOTYPE##NP(NOTYPE##S(NOTYPE##NP(NOTYPE##NNP(NOTYPE##Children)))(NOTYPE##VP-REL(NOTYPE##VBG-REL(NOTYPE##W))(NOTYPE##CC(NOTYPE##and))(NOTYPE##VBG(NOTYPE##waving))(NOTYPE##PP(NOTYPE##IN(NOTYPE##W))(NOTYPE##NP(NOTYPE##NN(NOTYPE##camera))))))))'
     ss = ss.replace(")", ") ").replace("(", " (")
     t = Tree(string=ss)
 
-    kernel = partialTreeKernel(dimension=5, LAMBDA=0.6, operation=op.fast_shuffled_convolution)
+    LAMBDA = 1
+    kernel = partialTreeKernel(dimension=5, LAMBDA=LAMBDA, operation=op.fast_shuffled_convolution)
+    print(kernel.partialtrees(t))
+
     (root_dptf, root_penalization) = kernel.dsf_with_weight(t.children[0], t)
 
-    kernel = partialTreeKernel(dimension=5, LAMBDA=0.6, operation=op.fast_shuffled_convolution)
+    kernel = partialTreeKernel(dimension=5, LAMBDA=LAMBDA, operation=op.fast_shuffled_convolution)
     root_dptf_sRecursive = kernel.sRecursive(t)
 
-    kernel = partialTreeKernel(dimension=5, LAMBDA=0.6, operation=op.fast_shuffled_convolution)
+    kernel = partialTreeKernel(dimension=5, LAMBDA=LAMBDA, operation=op.fast_shuffled_convolution)
     (root_dptf_2, root_penalization_2) = kernel.dptf_with_weight_v2(t.children[0], t)
 
-    kernel = partialTreeKernel(dimension=5, LAMBDA=0.6, operation=op.fast_shuffled_convolution)
+    kernel = partialTreeKernel(dimension=5, LAMBDA=LAMBDA, operation=op.fast_shuffled_convolution)
     dpt = kernel.ds(t)
 
-    kernel = partialTreeKernel(dimension=5, LAMBDA=0.6, operation=op.fast_shuffled_convolution)
+    kernel = partialTreeKernel(dimension=5, LAMBDA=LAMBDA, operation=op.fast_shuffled_convolution)
     dpt_2 = kernel.dpt_v2(t)
 
     print(root_dptf)
@@ -259,4 +287,3 @@ if __name__ == "__main__":
     sub = t.children[0].children[0]
     print(sub)
     print(kernel.findSuperTree(sub, t))"""
-
