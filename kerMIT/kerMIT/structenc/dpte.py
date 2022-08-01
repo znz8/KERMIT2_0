@@ -78,9 +78,12 @@ class partialTreeKernel(DSE):
             penalizing_value = self._mu * self._terminal_factor
             result = penalizing_value * v
         else:
-            result = self._mu * v + self.operation(v, self.operation(
-                self.distributedVector("separator"),
-                self.d(node.children, store_substructures)))
+            result = self._mu * v + self.operation(v,
+                                                   self.operation(
+                                                        self.distributedVector("separator"),
+                                                        self.d(node.children, store_substructures)
+                                                   )
+                                                   )
 
         # TODO quale e' qui il penalizing_value? mu non entra mai nella def del peso?
         penalizing_value = penalizing_value * np.sqrt(self.LAMBDA)
@@ -104,10 +107,9 @@ class partialTreeKernel(DSE):
         # hashmap used for dynamic programming
         dvalues = {}
 
-        result = np.zeros(self.dimension)
-        for k, c in enumerate(trees):
-            result = result + self.__dRecursive(trees, k, dvalues,
-                                                store_substructures)  # spectrum passato originariamente qui
+        result = self.__dRecursive(trees, 0, dvalues, store_substructures)
+        for k in range(1, len(trees)):
+            result = result + self.__dRecursive(trees, k, dvalues, store_substructures)  # spectrum passato originariamente qui
 
         return result
 
@@ -124,10 +126,11 @@ class partialTreeKernel(DSE):
             return dvalues[k]
 
         s_trees_k = self.sRecursive(trees[k], store_substructures)
+
         if k < len(trees) - 1:
             total = self.__dRecursive(trees, k + 1, dvalues, store_substructures)
             for i in range(k + 2, len(trees)):
-                total = total + self._mus[i - k - 1] * self.__dRecursive(trees, i, dvalues, store_substructures)
+                total = total + self.mu_pow(i - k - 1) * self.__dRecursive(trees, i, dvalues, store_substructures)
 
             result = s_trees_k + self.operation(s_trees_k, total)
         else:
@@ -144,7 +147,7 @@ class partialTreeKernel(DSE):
         self.sRecursive(tree)
         return self.spectrum
 
-    # TODO delete? impl diretta in java... ma memo substructs
+    # TODO delete? impl diretta in java... ma hai gia' calcolato spectrum come somma dei result (ciascuno e' s(n))
     def dpt_v2(self, tt: Tree):
         result = np.zeros(self.dimension)
         for n in tt.allNodes():
@@ -251,35 +254,45 @@ class partialTreeKernel(DSE):
 if __name__ == "__main__":
     ss = "(NP (DT The) (JJ wonderful) (NN time))"
     ss = '(NOTYPE##ROOT(NOTYPE##NP(NOTYPE##S(NOTYPE##NP(NOTYPE##NNP(NOTYPE##Children)))(NOTYPE##VP-REL(NOTYPE##VBG-REL(NOTYPE##W))(NOTYPE##CC(NOTYPE##and))(NOTYPE##VBG(NOTYPE##waving))(NOTYPE##PP(NOTYPE##IN(NOTYPE##W))(NOTYPE##NP(NOTYPE##NN(NOTYPE##camera))))))))'
+    ss = "(S (@S (NP (NP (@NP (DT The) (NN wait)) (NN time)) (PP (IN for) (NP (@NP (DT a) (JJ green)) (NN card)))) (VP (AUX has) (VP (@VP (VBN risen) (PP (IN from) (NP (@NP (NP (CD 21) (NNS months)) (TO to)) (NP (CD 33) (NNS months))))) (PP (IN in) (NP (@NP (DT those) (JJ same)) (NNS regions)))))) (. .))"
+
     ss = ss.replace(")", ") ").replace("(", " (")
     t = Tree(string=ss)
 
-    LAMBDA = 1
-    kernel = partialTreeKernel(dimension=5, LAMBDA=LAMBDA, operation=op.fast_shuffled_convolution)
-    print(kernel.partialtrees(t))
+    LAMBDA = 0.5
+    DIMENSION = 5
+    operation = op.fast_shuffled_convolution
 
-    (root_dptf, root_penalization) = kernel.dsf_with_weight(t.children[0], t)
+    kernel = partialTreeKernel(dimension=DIMENSION, LAMBDA=LAMBDA, operation=operation)
 
-    kernel = partialTreeKernel(dimension=5, LAMBDA=LAMBDA, operation=op.fast_shuffled_convolution)
-    root_dptf_sRecursive = kernel.sRecursive(t)
+    #print(kernel.partialtrees(t)[0])
 
-    kernel = partialTreeKernel(dimension=5, LAMBDA=LAMBDA, operation=op.fast_shuffled_convolution)
-    (root_dptf_2, root_penalization_2) = kernel.dptf_with_weight_v2(t.children[0], t)
-
-    kernel = partialTreeKernel(dimension=5, LAMBDA=LAMBDA, operation=op.fast_shuffled_convolution)
-    dpt = kernel.ds(t)
-
-    kernel = partialTreeKernel(dimension=5, LAMBDA=LAMBDA, operation=op.fast_shuffled_convolution)
-    dpt_2 = kernel.dpt_v2(t)
-
+    (root_dptf, root_penalization) = kernel.dsf_with_weight(t, t)
+    #(root_dptf_2, root_penalization_2) = kernel.dptf_with_weight_v2(t, t)
     print(root_dptf)
-    print(root_dptf_sRecursive)
-    print(root_dptf_2)
+    #print(root_dptf_2)
 
     print()
+
+    dpt = kernel.ds(t)
+    dpt_2 = kernel.dpt_v2(t)
     print(dpt)
-    print(np.sum([kernel.dtf_cache[k][0] for k in kernel.dtf_cache], axis=0))
-    print("penalizing values ", [(k, kernel.dtf_cache[k][1]) for k in kernel.dtf_cache])
+    print(dpt_2)
+
+
+    ## TEST
+    s1 = '(NOTYPE##ROOT(NOTYPE##NP(NOTYPE##S(NOTYPE##NP(NOTYPE##NNP(NOTYPE##Children)))(NOTYPE##VP-REL(NOTYPE##VBG-REL(NOTYPE##W))(NOTYPE##CC(NOTYPE##and))(NOTYPE##VBG(NOTYPE##waving))(NOTYPE##PP(NOTYPE##IN(NOTYPE##W))(NOTYPE##NP(NOTYPE##NN(NOTYPE##camera))))))))'
+    s2 = "(S (@S (NP (NP (@NP (DT The) (NN wait)) (NN time)) (PP (IN for) (NP (@NP (DT a) (JJ green)) (NN card)))) (VP (AUX has) (VP (@VP (VBN risen) (PP (IN from) (NP (@NP (NP (CD 21) (NNS months)) (TO to)) (NP (CD 33) (NNS months))))) (PP (IN in) (NP (@NP (DT those) (JJ same)) (NNS regions)))))) (. .))"
+
+    s1 = s1.replace(")", ") ").replace("(", " (")
+    s2 = s2.replace(")", ") ").replace("(", " (")
+    t1 = Tree(string=s1)
+    t2 = Tree(string=s2)
+
+
+
+
+    #print("penalizing values ", [(k, kernel.dtf_cache[k][1]) for k in kernel.dtf_cache])
     # print(kernel.kernel(t,frag))
 
     """print()
