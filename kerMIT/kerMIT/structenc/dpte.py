@@ -222,102 +222,18 @@ class partialTreeKernel(DSE):
         self.sRecursive(original, store_substructures=True)
         return self.dtf_cache[structure]
 
-    def compute(self, t1: Tree, t2: Tree):
-        """
-        The evaluation of the common PTs rooted in nodes n1 and n2 requires the selection of the shared child subsets of the two nodes.
-        For example (S (DT JJ N)) and (S (DT N N)) have (S [N)) (2 times) and (S [DT N)) in common.
-        Let F = {f1, f2, .., f|F|} be a tree fragment space of type PTs and let the indicator function I_i(n) be equal to 1 if the target fi is rooted at node n and 0 otherwise.
-        We define the PT kernel as:
-        K(T1, T2) = \sum_{n1 \in N_{T1}}\sum_{n2 \in N_{T2}} \Delta(n1, n2)
-        where N_{T1} and N_{T2} are the sets of nodes in T1 and T2 and \Delta(n1, n2) counts common fragments rooted at the n1 and n2 nodes:
-        """
-
-        sim = 0
-
-        def exp_delta(n1: Tree, n2: Tree):
-            """
-            \Delta(n1, n2) counts common fragments rooted at the n1 and n2 nodes:
-            \Delta(n1, n2) = \sum_{i = 1}^{|F|} I_i(n1)I_i(n2)
-
-            We compute as in Moschitii (2006) as follows:
-            If n1 and n2 are different then \Delta(n1, n2) = 0;
-            else \Delta(n1, n2) = 1 + \sum_{J_1,J_2, l(J_1)=l(J_2)} \prod_{i=1}^{l(J_1)} Delta(c_{n1}[J_{1i}], c_{n2}[J_{2i}])
-
-            where:
-            J_1 =<J_{11}, J_{12}, J_{13}, ..> and J_2 = <J_{21}, J_{22}, J_{23}, ..> are index sequences associated with the ordered child sequences c_{n1} of n1 and c_{n2} of n2, respectively
-            J_{1i} and J_{2i} point to the i-th children in the two sequences, and l(·) returns the sequence length.
-
-            """
-            if n1.root != n2.root:
-                return 0
-
-            sum = 1
-
-            c_n1 = n1.children
-            c_n2 = n2.children
-
-            range_indexes = range(0, min(len(c_n1), len(c_n2)))
-            for j1, j2 in it.product(range_indexes):
-                prod = 1
-                for i in range(0, len(j1)):
-                    prod *= exp_delta(c_n1[j1[i]], c_n2[j2[i]])
-                sum += prod
-
-        def delta(n1: Tree, n2: Tree, LAMBDA, mu):
-            """
-            Eq. 3 can be distributed with respect to different types of sequences, e.g. those composed by p children:
-            \Delta(n1, n2) = \mu(\lambda^2 + \sum_{p=1}^{lm} \Delta_p(c_{n1} , c_{n2}))
-            """
-            if n1.root != n2.root:
-                return 0
-
-            if n1.children is None or n2.children is None:
-                return LAMBDA + mu ** 2
-
-            lm = min(len(n1.children), len(n2.children))
-            s = 0
-            for p in range(0, lm):
-                s += deltap(n1.children, n2.children, LAMBDA, mu)
-
-            return LAMBDA * (mu ** 2 + s)
-
-        def deltap(children1, children2, LAMBDA, mu):
-            if len(children1) == 0:
-                return 1
-
-            s1, a = children1[:-1], children1[-1]
-            s2, b = children2[:-1], children2[-1]
-
-            if a.root != b.root:
-                return 0
-
-            return delta(a, b, LAMBDA, mu) * Dp(s1, s2, LAMBDA, mu)
-
-        def Dp(s1, s2, LAMBDA, mu):
-            s = 0
-            for i in range(0, len(s1)):
-                for r in range(0, len(s2)):
-                    s += mu ** (len(s1)-1 - i + len(s2)-1 - r) * deltap(s1[0:i], s2[0:r], LAMBDA, mu)
-
-            """s = deltap(s1[1:k], s2[1:l], LAMBDA, mu)
-            s += mu * Dp(s1, s2, k, l-1, LAMBDA, mu)
-            s += mu * Dp(s1, s2, k-1, l, LAMBDA, mu)
-            s -= (mu**2) * Dp(s1, s2, k-1, l, LAMBDA, mu)"""
-            return s
-
-        for n1 in t1.allNodes():
-            for n2 in t2.allNodes():
-                sim += delta(n1, n2, LAMBDA=self.LAMBDA, mu=self._mu)
-
-        return sim
-
     def substructures(self, structure: Tree):
         active_in_root, inactive_in_root = self.__partialtrees(structure)
         return active_in_root + inactive_in_root
 
     def __partialtrees(self, t: Tree):
-        if t.isPreTerminal():
-            return [Tree(root=t.root), t], []
+        # TODO mi sembrava di aver capito che i singoli nodi non fossero pt..?
+        #if t.isPreTerminal():
+        #    return [Tree(root=t.root), t], []
+
+        if t.isTerminal():
+            return [Tree(root=t.root)], []
+
 
         active_in_children = []
         inactive_pt = []
@@ -326,7 +242,10 @@ class partialTreeKernel(DSE):
             active_in_children.append(active_in_c + [None])
 
             inactive_pt.extend(other)
-            inactive_pt.extend([x for x in active_in_c if x.depth() > 1])
+            # TODO mi sembrava di aver capito che i singoli nodi non fossero pt..?
+            # Ma codice moschitti li conta! E anche il lessico
+            #inactive_pt.extend([x for x in active_in_c if x.depth() > 1])
+            inactive_pt.extend(active_in_c)
 
         active_in_t = []
 
@@ -348,6 +267,13 @@ class partialTreeKernel(DSE):
         return active_in_t, inactive_pt
 
 
+if __name__ == "__main__":
+    s1 = "(NP (NP (DT A) (NN bunch)) (PP (IN of) (NP (NP (NNS trays)))))"
+    s1 = s1.replace(")", ") ").replace("(", " (")
+    t1 = Tree(string=s1)
+    print(t1)
+    kernel = partialTreeKernel(dimension=8192, LAMBDA= 0.6, operation=op.fast_shuffled_convolution)
+    kernel.ds(t1)
 
 
 
