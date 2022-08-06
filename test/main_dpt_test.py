@@ -2,10 +2,11 @@ import os
 import random
 
 from kerMIT.structenc.dpte import partialTreeKernel
-import pandas as pd
 import kerMIT.operation as op
 from kerMIT.tree import Tree
 from kerMIT.tree_encode import parse
+from stanfordcorenlp import StanfordCoreNLP
+import pandas as pd
 import numpy as np
 import json
 
@@ -187,6 +188,8 @@ def test_with_kernel(input_file, output_path, LAMBDA: float = 1,
 
 
 class Tester:
+    nlp = StanfordCoreNLP('../stanford-corenlp-full-2018-10-05')
+
     @staticmethod
     def create_test(output, on="caption"):
         if on == "caption":
@@ -209,9 +212,8 @@ class Tester:
         for i in range(0, 20, 2):
             s1 = captions.values[i]
             s2 = captions.values[i + 1]
-
-            t1 = parse(s1).replace('\r', '').replace('\t', ' ')
-            t2 = parse(s2).replace('\r', '').replace('\t', ' ')
+            t1 = parse(s1, nlp=Tester.nlp).replace('\r', '').replace('\t', ' ')
+            t2 = parse(s2, nlp=Tester.nlp).replace('\r', '').replace('\t', ' ')
 
             test.append({"s1": t1, "s2": t2})
 

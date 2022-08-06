@@ -7,11 +7,10 @@ import ast
 import time
 
 
-nlp = StanfordCoreNLP(r'./stanford-corenlp-full-2018-10-05')
+def parse(text, nlp=None):
+    if nlp is None:
+        nlp = StanfordCoreNLP(r'./stanford-corenlp-full-2018-10-05')
 
-def parse(text):
-    
-    
     #text = (text.encode('ascii', 'ignore')).decode("utf-8")
 
     
