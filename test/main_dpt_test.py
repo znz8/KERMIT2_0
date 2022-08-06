@@ -31,7 +31,7 @@ class PT_Kernel:
         \Delta(n1, n2) = \sum_{i = 1}^{|F|} I_i(n1)I_i(n2)
         """
         sim = 0
-
+        #TODO reinserisci delta matrix
         for n1 in t1.allNodes():
             for n2 in t2.allNodes():
                 sim += self.delta(n1, n2)
