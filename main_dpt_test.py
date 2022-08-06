@@ -1,4 +1,5 @@
 import os
+import random
 
 from kerMIT.structenc.dpte import partialTreeKernel
 import pandas as pd
@@ -86,8 +87,8 @@ class PT_Kernel:
         return self.mu * (self.LAMBDA ** 2 + self.delta_sk(t1.children, t2.children))
 
 
-def test_in_original_space(input_file, LAMBDA: float = 1, DIMENSION: int = 8192, operation=op.fast_shuffled_convolution,
-                           output_path="record_result_test_vs_original_fragments_space.csv"):
+def test_in_original_space(input_file, output_path,
+                           LAMBDA: float = 1, DIMENSION: int = 8192, operation=op.fast_shuffled_convolution):
     input_sentences = pd.read_csv(input_file)
     ss1 = input_sentences["s1"]
     ss2 = input_sentences["s2"]
@@ -142,8 +143,8 @@ def test_in_original_space(input_file, LAMBDA: float = 1, DIMENSION: int = 8192,
     df.to_csv(output_path)
 
 
-def test_with_kernel(input_file, LAMBDA: float = 1, DIMENSION: int = 8192, operation=op.fast_shuffled_convolution,
-                     output_path="record_result_test_vs_original_kernel.csv"):
+def test_with_kernel(input_file, output_path, LAMBDA: float = 1,
+                     DIMENSION: int = 8192, operation=op.fast_shuffled_convolution,):
     input_sentences = pd.read_csv(input_file)
     ss1 = input_sentences["s1"]
     ss2 = input_sentences["s2"]
@@ -185,25 +186,71 @@ def test_with_kernel(input_file, LAMBDA: float = 1, DIMENSION: int = 8192, opera
     df.to_csv(output_path)
 
 
-def create_test(output):
-    input_path = "coco_annotation_2014/captions_train2014.json"
+class Tester:
+    @staticmethod
+    def create_test(output, on="caption"):
+        if on == "caption":
+            Tester.__test_on_caption(output)
+        if on == "hans_dataset":
+            Tester.__test_on_hans(output)
 
-    fd = open(input_path, "r")
-    j = json.load(fd)
-    fd.close()
-    captions = pd.DataFrame(j["annotations"]).set_index("image_id", drop=True).sort_index().groupby(level=0).sample(2)["caption"]
+    @staticmethod
+    def __test_on_caption(output):
+        input_path = "data/caption/captions_train2014.json"
 
-    test = []
-    for i in range(0, 20, 2):
-        s1 = captions.values[i]
-        s2 = captions.values[i + 1]
+        fd = open(input_path, "r")
+        j = json.load(fd)
+        fd.close()
+        captions = \
+            pd.DataFrame(j["annotations"]).set_index("image_id", drop=True).sort_index().groupby(level=0).sample(2)[
+                "caption"]
 
-        t1 = parse(s1).replace('\r', '').replace('\t', ' ')
-        t2 = parse(s2).replace('\r', '').replace('\t', ' ')
+        test = []
+        for i in range(0, 20, 2):
+            s1 = captions.values[i]
+            s2 = captions.values[i + 1]
 
-        test.append({"s1": t1, "s2": t2})
+            t1 = parse(s1).replace('\r', '').replace('\t', ' ')
+            t2 = parse(s2).replace('\r', '').replace('\t', ' ')
 
-    pd.DataFrame(test).to_csv(output)
+            test.append({"s1": t1, "s2": t2})
+
+        pd.DataFrame(test).to_csv(output)
+
+    @staticmethod
+    def __test_on_hans(output):
+        test = []
+        sentences = pd.read_csv("data/hans_dataset/dataset_SHORT_4_Aria.csv")["sentence_parse"]
+
+        print(sentences)
+        for file in os.listdir("data/hans_dataset/hans_pattern"):
+            print(file)
+            lines = open(os.path.join("data/hans_dataset/hans_pattern", file), "r").readlines()
+            filtered = []
+            for line in lines:
+                s = line.split(' ')
+                if len(s) == 2:
+                    filtered.append({"pattern": s[0].strip(), "id":s[1].strip() })
+            index = pd.DataFrame(filtered)
+            index = list(index[index["pattern"] == "True"]["id"])
+
+            for i in range(0, len(index)):
+                random.seed(i)
+                i2 = random.choice(index)
+                try:
+                    i1, i2 = int(index[i]), int(i2)
+
+                    if i1 in sentences.index and i2 in sentences.index:
+                        t1 = sentences.loc[int(i1)]
+                        t2 = sentences.loc[int(i2)]
+                        test.append({"s1": t1, "s2": t2})
+
+                except ValueError:
+                    continue
+
+            print(len(test))
+        if len(test) > 0:
+            pd.DataFrame(test).to_csv(output)
 
 
 def test_kernel_and_explicit():
@@ -232,15 +279,37 @@ if __name__ == "__main__":
     test_kernel_and_explicit()
     print("---------------------------------")
 
-    input_file = "test.csv"
+    on = "caption"
+    input_file = f"test_{on}.csv"
     if not os.path.exists(input_file):
-        create_test(input_file)
+        Tester.create_test(input_file, on=on)
 
-    print("---------------------------------")
-    print("DISTRIBUTED KERNEL vs KERNEL")
-    test_with_kernel(input_file, LAMBDA=1, DIMENSION=8192, operation=op.fast_shuffled_convolution,
-                     output_path="record_result_test_vs_original_kernel.csv")
-    print("---------------------------------")
+    out = f"test_{on}_result_vs_original_kernel.csv"
+    if not os.path.exists(out):
+        print("---------------------------------")
+        print(f"DISTRIBUTED KERNEL vs KERNEL -- {on}")
+        test_with_kernel(input_file, output_path=out,
+                         LAMBDA=1, DIMENSION=8192, operation=op.fast_shuffled_convolution,
+                         )
+        print("---------------------------------")
+
+    on = "hans_dataset"
+    input_file = f"test_{on}.csv"
+    if not os.path.exists(input_file):
+        Tester.create_test(input_file, on=on)
+
+    out = f"test_{on}_result_vs_original_kernel.csv"
+    if not os.path.exists(out):
+        print("---------------------------------")
+        print(f"DISTRIBUTED KERNEL vs KERNEL -- {on}")
+        test_with_kernel(input_file, output_path=out,
+                         LAMBDA=1, DIMENSION=8192, operation=op.fast_shuffled_convolution,
+                         )
+        print("---------------------------------")
+
+    df = pd.read_csv(out)
+    for row in df[df["original_scaled"] > 0.2].iterrows():
+        print(row)
     # TODO non funziona
     # print(kernel.compute(t1, t2))
     # print("penalizing values ", [(k, kernel.dtf_cache[k][1]) for k in kernel.dtf_cache])
