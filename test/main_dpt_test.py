@@ -88,13 +88,12 @@ class PT_Kernel:
         return self.mu * (self.LAMBDA ** 2 + self.delta_sk(t1.children, t2.children))
 
 
-def test_in_original_space(input_file, output_path,
-                           LAMBDA: float = 1, DIMENSION: int = 8192, operation=op.fast_shuffled_convolution):
+def test_in_original_space(input_file, output_path, DIMENSION: int = 8192, operation=op.fast_shuffled_convolution):
     input_sentences = pd.read_csv(input_file)
     ss1 = input_sentences["s1"]
     ss2 = input_sentences["s2"]
 
-    kernel = partialTreeKernel(dimension=DIMENSION, LAMBDA=LAMBDA, operation=operation)
+    kernel = partialTreeKernel(dimension=DIMENSION, LAMBDA=1, MU=1, operation=operation)
     records = []
     for i in range(0, len(ss1)):
         s1, s2 = ss1[i], ss2[i]
@@ -145,7 +144,12 @@ def test_in_original_space(input_file, output_path,
 
 
 def test_with_kernel(input_file, output_path, LAMBDA: float = 1., MU: float = 1.,
-                     DIMENSION: int = 8192, operation=op.fast_shuffled_convolution,):
+                     DIMENSION: int = 8192, operation=op.fast_shuffled_convolution, n=None):
+
+    if Tester.completed_test(input_file, LAMBDA, MU, DIMENSION):
+        print(f"Tested already on input_file={input_file}, LAMBDA={LAMBDA}, MU={MU}, DIMENSION={DIMENSION}")
+        return
+
     input_sentences = pd.read_csv(input_file)
     ss1 = input_sentences["s1"]
     ss2 = input_sentences["s2"]
@@ -154,7 +158,12 @@ def test_with_kernel(input_file, output_path, LAMBDA: float = 1., MU: float = 1.
     pt_kernel = PT_Kernel(LAMBDA=MU, MU=LAMBDA)
 
     records = []
-    for i in range(0, len(ss1)):
+    if n is None:
+        n = len(ss1)
+    else:
+        n = min(len(ss1), n)
+
+    for i in range(0, n):
         s1, s2 = ss1[i], ss2[i]
         record = {"s1": s1, "s2": s2}
 
@@ -200,7 +209,7 @@ class Tester:
             Tester.config[on] = []
 
         Tester.config[on].append({"lambda": LAMBDA, "mu": mu, "dimension": dimension})
-        json.dump(Tester.config, open("config.json", 'w'))
+        json.dump(Tester.config, open("config.json", 'w'), indent=2)
 
     @staticmethod
     def completed_test(on, LAMBDA, mu, dimension):
@@ -312,27 +321,30 @@ if __name__ == "__main__":
         Tester.create_test(input_file, on=on)
 
     out = f"test_{on}_result_vs_original_kernel.csv"
-    if not os.path.exists(out) or not Tester.completed_test(on, LAMBDA, MU, DIMENSION):
-        print("---------------------------------")
-        print(f"DISTRIBUTED KERNEL vs KERNEL -- {on}")
-        test_with_kernel(input_file, output_path=out,
-                         LAMBDA=LAMBDA, DIMENSION=DIMENSION, operation=op.fast_shuffled_convolution,
-                         )
-        print("---------------------------------")
+
+    print("---------------------------------")
+    print(f"DISTRIBUTED KERNEL vs KERNEL -- {on}")
+    test_with_kernel(input_file, output_path=out,
+                     LAMBDA=LAMBDA, MU=MU, DIMENSION=DIMENSION,
+                     operation=op.fast_shuffled_convolution
+                     )
+    print("---------------------------------")
 
     on = "hans_dataset"
     input_file = f"test_{on}.csv"
     if not os.path.exists(input_file):
         Tester.create_test(input_file, on=on)
 
+    n = 10
     out = f"test_{on}_result_vs_original_kernel.csv"
-    if not os.path.exists(out) or False:
-        print("---------------------------------")
-        print(f"DISTRIBUTED KERNEL vs KERNEL -- {on}")
-        test_with_kernel(input_file, output_path=out,
-                         LAMBDA=LAMBDA, DIMENSION=DIMENSION, operation=op.fast_shuffled_convolution,
-                         )
-        print("---------------------------------")
+
+    print("---------------------------------")
+    print(f"DISTRIBUTED KERNEL vs KERNEL -- {on}")
+    test_with_kernel(input_file, output_path=out,
+                     LAMBDA=LAMBDA, MU=MU, DIMENSION=DIMENSION,
+                     operation=op.fast_shuffled_convolution,
+                     n=n)
+    print("---------------------------------")
 
     df = pd.read_csv(out)
     for row in df[df["original_scaled"] > 0.2].iterrows():
