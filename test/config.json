@@ -6,19 +6,14 @@
       "dimension": 8192
     },
     {
-      "lambda": 0.6,
+      "lambda": 1,
       "mu": 1,
-      "dimension": 8192
+      "dimension": 300
     }
   ],
   "test_hans_dataset.csv": [
     {
       "lambda": 1,
-      "mu": 1,
-      "dimension": 8192
-    },
-    {
-      "lambda": 0.6,
       "mu": 1,
       "dimension": 8192
     }

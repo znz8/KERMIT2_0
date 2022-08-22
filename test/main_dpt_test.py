@@ -9,6 +9,7 @@ from stanfordcorenlp import StanfordCoreNLP
 import pandas as pd
 import numpy as np
 import json
+import itertools
 
 
 class PT_Kernel:
@@ -193,7 +194,7 @@ def test_with_kernel(input_file, output_path, LAMBDA: float = 1., MU: float = 1.
     df["dimension"] = DIMENSION
     df["LAMBDA"] = LAMBDA
     df["MU"] = MU
-    print(df.loc[0])
+
     df.to_csv(output_path, mode='a', header=not os.path.exists(output_path))
 
     Tester.add_to_config(input_file, LAMBDA, MU, DIMENSION)
@@ -311,44 +312,48 @@ if __name__ == "__main__":
     test_kernel_and_explicit()
     print("---------------------------------")
 
-    LAMBDA = 0.6
-    MU = 1
-    DIMENSION = 8192
+    params = [
+        [1, 0.7, 0.6],
+        [1, 0.6],
+        [8192, 300]
+    ]
+    for LAMBDA, MU, DIMENSION in itertools.product(*params):
 
-    on = "caption"
-    input_file = f"test_{on}.csv"
-    if not os.path.exists(input_file):
-        Tester.create_test(input_file, on=on)
+        on = "caption"
+        input_file = f"test_{on}.csv"
+        if not os.path.exists(input_file):
+            Tester.create_test(input_file, on=on)
 
-    out = f"test_{on}_result_vs_original_kernel.csv"
+        out = f"test_{on}_result_vs_original_kernel.csv"
 
-    print("---------------------------------")
-    print(f"DISTRIBUTED KERNEL vs KERNEL -- {on}")
-    test_with_kernel(input_file, output_path=out,
-                     LAMBDA=LAMBDA, MU=MU, DIMENSION=DIMENSION,
-                     operation=op.fast_shuffled_convolution
-                     )
-    print("---------------------------------")
+        print("---------------------------------")
+        print(f"DISTRIBUTED KERNEL vs KERNEL -- {on}")
+        test_with_kernel(input_file, output_path=out,
+                         LAMBDA=LAMBDA, MU=MU, DIMENSION=DIMENSION,
+                         operation=op.fast_shuffled_convolution
+                         )
+        print("---------------------------------")
 
-    on = "hans_dataset"
-    input_file = f"test_{on}.csv"
-    if not os.path.exists(input_file):
-        Tester.create_test(input_file, on=on)
+        on = "hans_dataset"
+        input_file = f"test_{on}.csv"
+        if not os.path.exists(input_file):
+            Tester.create_test(input_file, on=on)
 
-    n = 10
-    out = f"test_{on}_result_vs_original_kernel.csv"
+        n = 100
+        out = f"test_{on}_result_vs_original_kernel.csv"
 
-    print("---------------------------------")
-    print(f"DISTRIBUTED KERNEL vs KERNEL -- {on}")
-    test_with_kernel(input_file, output_path=out,
-                     LAMBDA=LAMBDA, MU=MU, DIMENSION=DIMENSION,
-                     operation=op.fast_shuffled_convolution,
-                     n=n)
-    print("---------------------------------")
+        print("---------------------------------")
+        print(f"DISTRIBUTED KERNEL vs KERNEL -- {on}")
+        test_with_kernel(input_file, output_path=out,
+                         LAMBDA=LAMBDA, MU=MU, DIMENSION=DIMENSION,
+                         operation=op.fast_shuffled_convolution,
+                         n=n)
+        print("---------------------------------")
 
-    df = pd.read_csv(out)
-    for row in df[df["original_scaled"] > 0.2].iterrows():
-        print(row)
+        df = pd.read_csv(out)
+        for row in df[(df["original_scaled"] > 0.2) & (df["MU"] == MU) &
+                      (df["LAMBDA"] == LAMBDA) & (df["DIMENSION"] == DIMENSION)].iterrows():
+            print(row)
 
     # TODO
     # print(kernel.compute(t1, t2))
