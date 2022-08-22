@@ -340,7 +340,6 @@ if __name__ == "__main__":
             print(row)
         print("---------------------------------")
 
-        continue
         on = "hans_dataset"
         input_file = f"test_{on}.csv"
         if not os.path.exists(input_file):
