@@ -1,3 +1,4 @@
+import math
 import os
 import random
 
@@ -332,8 +333,14 @@ if __name__ == "__main__":
                          LAMBDA=LAMBDA, MU=MU, DIMENSION=DIMENSION,
                          operation=op.fast_shuffled_convolution
                          )
+
+        df = pd.read_csv(out)
+        for row in df[(df["original_scaled"] > 0.2) & (df["MU"] == MU) &
+                      (df["LAMBDA"] == LAMBDA) & (df["dimension"] == DIMENSION)].iterrows():
+            print(row)
         print("---------------------------------")
 
+        continue
         on = "hans_dataset"
         input_file = f"test_{on}.csv"
         if not os.path.exists(input_file):
@@ -348,13 +355,12 @@ if __name__ == "__main__":
                          LAMBDA=LAMBDA, MU=MU, DIMENSION=DIMENSION,
                          operation=op.fast_shuffled_convolution,
                          n=n)
-        print("---------------------------------")
 
         df = pd.read_csv(out)
         for row in df[(df["original_scaled"] > 0.2) & (df["MU"] == MU) &
-                      (df["LAMBDA"] == LAMBDA) & (df["DIMENSION"] == DIMENSION)].iterrows():
+                      (df["LAMBDA"] == LAMBDA) & (df["dimension"] == DIMENSION)].iterrows():
             print(row)
-
+        print("---------------------------------")
     # TODO
     # print(kernel.compute(t1, t2))
     # print("penalizing values ", [(k, kernel.dtf_cache[k][1]) for k in kernel.dtf_cache])
