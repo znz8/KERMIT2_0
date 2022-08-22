@@ -218,7 +218,7 @@ class Tester:
         if on not in Tester.config:
             return False
         for lm in Tester.config[on]:
-            if lm["lambda"] ==  LAMBDA and lm["mu"] == mu and lm["dimension"] == dimension:
+            if lm["lambda"] == LAMBDA and lm["mu"] == mu and lm["dimension"] == dimension:
                 return True
         return False
 

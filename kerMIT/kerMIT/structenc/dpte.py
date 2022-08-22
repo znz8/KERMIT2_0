@@ -274,7 +274,7 @@ if __name__ == "__main__":
     s1 = s1.replace(")", ") ").replace("(", " (")
     t1 = Tree(string=s1)
     print(t1)
-    kernel = partialTreeKernel(dimension=8192, LAMBDA= 0.6, operation=op.fast_shuffled_convolution)
+    kernel = partialTreeKernel(dimension=8192, LAMBDA=0.6, operation=op.fast_shuffled_convolution)
     kernel.ds(t1)
 
 

@@ -66,6 +66,61 @@
       "lambda": 1,
       "mu": 1,
       "dimension": 8192
+    },
+    {
+      "lambda": 1,
+      "mu": 1,
+      "dimension": 300
+    },
+    {
+      "lambda": 1,
+      "mu": 0.6,
+      "dimension": 8192
+    },
+    {
+      "lambda": 1,
+      "mu": 0.6,
+      "dimension": 300
+    },
+    {
+      "lambda": 0.7,
+      "mu": 1,
+      "dimension": 8192
+    },
+    {
+      "lambda": 0.7,
+      "mu": 1,
+      "dimension": 300
+    },
+    {
+      "lambda": 0.7,
+      "mu": 0.6,
+      "dimension": 8192
+    },
+    {
+      "lambda": 0.7,
+      "mu": 0.6,
+      "dimension": 300
+    },
+    {
+      "lambda": 0.6,
+      "mu": 1,
+      "dimension": 8192
+    },
+    {
+      "lambda": 0.6,
+      "mu": 1,
+      "dimension": 300
+    },
+    {
+      "lambda": 0.6,
+      "mu": 0.6,
+      "dimension": 8192
+    },
+    {
+      "lambda": 0.6,
+      "mu": 0.6,
+      "dimension": 300
     }
   ]
 }
