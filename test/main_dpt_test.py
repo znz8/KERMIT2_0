@@ -15,9 +15,9 @@ class PT_Kernel:
     __MAX_CHILDREN = 50
     __MAX_RECURSION = 20
 
-    def __init__(self, LAMBDA=1.0, mu=1.0):
+    def __init__(self, LAMBDA=1.0, MU=1.0):
         self.LAMBDA = LAMBDA
-        self.mu = mu
+        self.mu = MU
 
     def kernel_similarity(self, t1: Tree, t2: Tree):
         """
@@ -141,17 +141,17 @@ def test_in_original_space(input_file, output_path,
     df["dimension"] = DIMENSION * len(df)
     df["LAMBDA"] = LAMBDA * len(df)
 
-    df.to_csv(output_path)
+    df.to_csv(output_path, mode='a', header=not os.path.exists(output_path))
 
 
-def test_with_kernel(input_file, output_path, LAMBDA: float = 1,
+def test_with_kernel(input_file, output_path, LAMBDA: float = 1., MU: float = 1.,
                      DIMENSION: int = 8192, operation=op.fast_shuffled_convolution,):
     input_sentences = pd.read_csv(input_file)
     ss1 = input_sentences["s1"]
     ss2 = input_sentences["s2"]
 
-    pt_encoder = partialTreeKernel(dimension=DIMENSION, LAMBDA=LAMBDA, operation=operation)
-    pt_kernel = PT_Kernel(LAMBDA=1)
+    pt_encoder = partialTreeKernel(dimension=DIMENSION, LAMBDA=LAMBDA, MU=MU, operation=operation)
+    pt_kernel = PT_Kernel(LAMBDA=MU, MU=LAMBDA)
 
     records = []
     for i in range(0, len(ss1)):
@@ -183,12 +183,33 @@ def test_with_kernel(input_file, output_path, LAMBDA: float = 1,
     df = pd.DataFrame(records)
     df["dimension"] = DIMENSION
     df["LAMBDA"] = LAMBDA
+    df["MU"] = MU
     print(df.loc[0])
-    df.to_csv(output_path)
+    df.to_csv(output_path, mode='a', header=not os.path.exists(output_path))
+
+    Tester.add_to_config(input_file, LAMBDA, MU, DIMENSION)
 
 
 class Tester:
     nlp = StanfordCoreNLP('../stanford-corenlp-full-2018-10-05')
+    config = json.load(open("config.json"))
+
+    @staticmethod
+    def add_to_config(on, LAMBDA, mu, dimension):
+        if on not in Tester.config:
+            Tester.config[on] = []
+
+        Tester.config[on].append({"lambda": LAMBDA, "mu": mu, "dimension": dimension})
+        json.dump(Tester.config, open("config.json", 'w'))
+
+    @staticmethod
+    def completed_test(on, LAMBDA, mu, dimension):
+        if on not in Tester.config:
+            return False
+        for lm in Tester.config[on]:
+            if lm["lambda"] ==  LAMBDA and lm["mu"] == mu and lm["dimension"] == dimension:
+                return True
+        return False
 
     @staticmethod
     def create_test(output, on="caption"):
@@ -281,17 +302,21 @@ if __name__ == "__main__":
     test_kernel_and_explicit()
     print("---------------------------------")
 
+    LAMBDA = 0.6
+    MU = 1
+    DIMENSION = 8192
+
     on = "caption"
     input_file = f"test_{on}.csv"
     if not os.path.exists(input_file):
         Tester.create_test(input_file, on=on)
 
     out = f"test_{on}_result_vs_original_kernel.csv"
-    if not os.path.exists(out):
+    if not os.path.exists(out) or not Tester.completed_test(on, LAMBDA, MU, DIMENSION):
         print("---------------------------------")
         print(f"DISTRIBUTED KERNEL vs KERNEL -- {on}")
         test_with_kernel(input_file, output_path=out,
-                         LAMBDA=1, DIMENSION=8192, operation=op.fast_shuffled_convolution,
+                         LAMBDA=LAMBDA, DIMENSION=DIMENSION, operation=op.fast_shuffled_convolution,
                          )
         print("---------------------------------")
 
@@ -301,18 +326,19 @@ if __name__ == "__main__":
         Tester.create_test(input_file, on=on)
 
     out = f"test_{on}_result_vs_original_kernel.csv"
-    if not os.path.exists(out):
+    if not os.path.exists(out) or False:
         print("---------------------------------")
         print(f"DISTRIBUTED KERNEL vs KERNEL -- {on}")
         test_with_kernel(input_file, output_path=out,
-                         LAMBDA=1, DIMENSION=8192, operation=op.fast_shuffled_convolution,
+                         LAMBDA=LAMBDA, DIMENSION=DIMENSION, operation=op.fast_shuffled_convolution,
                          )
         print("---------------------------------")
 
     df = pd.read_csv(out)
     for row in df[df["original_scaled"] > 0.2].iterrows():
         print(row)
-    # TODO non funziona
+
+    # TODO
     # print(kernel.compute(t1, t2))
     # print("penalizing values ", [(k, kernel.dtf_cache[k][1]) for k in kernel.dtf_cache])
     # print(kernel.kernel(t,frag))

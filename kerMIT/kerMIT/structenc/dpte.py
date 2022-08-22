@@ -11,6 +11,8 @@ class partialTreeKernel(DSE):
         self.LAMBDA = LAMBDA
         self.dimension = dimension
         self.operation = operation
+        self.lexicalized = True
+
         self.sn_cache = {}
         self.dt_cache = {}
         self.dtf_cache = {}
@@ -64,7 +66,8 @@ class partialTreeKernel(DSE):
             return self._mu ** exp
 
     def sRecursive(self, node: Tree, store_substructures=False):
-        """Recursive computation of function s(n) for the root of the input tree.
+        """
+        Recursive computation of function s(n) for the root of the input tree.
         s(n) sums all of the tree fragments rooted in n.
         :param node: the input tree
         :return s(node): sum of all of the tree fragments rooted in node
@@ -72,8 +75,7 @@ class partialTreeKernel(DSE):
         v = self.distributedVector(node.root)
         penalizing_value = 1
 
-        # TODO non sembra mai non lessicalizzato
-        if node.isTerminal():
+        if node.isTerminal() or (not self.lexicalized and node.isPreTerminal()):
             penalizing_value = self._mu * self._terminal_factor
             result = penalizing_value * v
         else:
@@ -81,7 +83,7 @@ class partialTreeKernel(DSE):
                                                    self.operation(
                                                         self.distributedVector("separator"),
                                                         self.d(node.children, store_substructures)
-                                                   )
+                                                        )
                                                    )
 
         # TODO quale e' qui il penalizing_value? mu non entra mai nella def del peso?
