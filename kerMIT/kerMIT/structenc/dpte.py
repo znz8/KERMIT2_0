@@ -86,7 +86,7 @@ class partialTreeKernel(DSE):
                                                         )
                                                    )
 
-        # TODO quale e' qui il penalizing_value? mu non entra mai nella def del peso?
+        # TODO quale e' qui il penalizing_value?
         penalizing_value = penalizing_value * np.sqrt(self.LAMBDA)
         result = penalizing_value * result
 
@@ -155,6 +155,7 @@ class partialTreeKernel(DSE):
             result += self.sRecursive(n, store_substructures=True)
         return result
 
+    # TODO non ho capito
     def dsf(self, structure: Tree, original: Tree):
         return self.dsf_with_weight(structure, original)[0]
 

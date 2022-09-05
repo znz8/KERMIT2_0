@@ -11,6 +11,7 @@ import pandas as pd
 import numpy as np
 import json
 import itertools
+import matplotlib.pyplot as plt
 
 
 class PT_Kernel:
@@ -33,7 +34,7 @@ class PT_Kernel:
         \Delta(n1, n2) = \sum_{i = 1}^{|F|} I_i(n1)I_i(n2)
         """
         sim = 0
-        #TODO reinserisci delta matrix
+        # TODO reinserisci delta matrix
         for n1 in t1.allNodes():
             for n2 in t2.allNodes():
                 sim += self.delta(n1, n2)
@@ -147,7 +148,6 @@ def test_in_original_space(input_file, output_path, DIMENSION: int = 8192, opera
 
 def test_with_kernel(input_file, output_path, LAMBDA: float = 1., MU: float = 1.,
                      DIMENSION: int = 8192, operation=op.fast_shuffled_convolution, n=None):
-
     if Tester.completed_test(input_file, LAMBDA, MU, DIMENSION):
         print(f"Tested already on input_file={input_file}, LAMBDA={LAMBDA}, MU={MU}, DIMENSION={DIMENSION}")
         return
@@ -264,7 +264,7 @@ class Tester:
             for line in lines:
                 s = line.split(' ')
                 if len(s) == 2:
-                    filtered.append({"pattern": s[0].strip(), "id":s[1].strip() })
+                    filtered.append({"pattern": s[0].strip(), "id": s[1].strip()})
             index = pd.DataFrame(filtered)
             index = list(index[index["pattern"] == "True"]["id"])
 
@@ -305,6 +305,29 @@ def test_kernel_and_explicit():
         c2 = sub_t2.count(t)
         res += c1 * c2
     print("exp: ", res)
+
+
+def plot_results(df, LAMBDA, MU, DIMENSION):
+    if not os.path.exists('vis'):
+        os.mkdir('vis')
+
+    for t in ['_count', '_scaled']:
+        if not os.path.exists(os.path.join('vis', t)):
+            os.mkdir(os.path.join('vis', t))
+
+    x = [x for x in range(0, len(df[(df["MU"] == MU) & (df["LAMBDA"] == LAMBDA) & (df["dimension"] == DIMENSION)]))]
+    for t in ['_count', '_scaled']:
+        for o in ['original', 'dpt']:
+            y = df[(df["MU"] == MU) & (df["LAMBDA"] == LAMBDA) & (df["dimension"] == DIMENSION)][o + t]
+            if len(y) > 100:
+                y = df[(df["original_scaled"] > 0.1) & (df["MU"] == MU) & (df["LAMBDA"] == LAMBDA) & (df["dimension"] == DIMENSION)][o + t]
+                x = [i for i in range(0, len(y))]
+            plt.plot(x, y, label=o + t)
+        plt.legend()
+        title = f"type{t}_mu_{MU}_lambda_{LAMBDA}_dim_{DIMENSION}"
+        plt.title(title)
+        plt.savefig(os.path.join('vis', t, title+'.png'))
+        plt.close()
 
 
 if __name__ == "__main__":
@@ -359,7 +382,10 @@ if __name__ == "__main__":
         for row in df[(df["original_scaled"] > 0.2) & (df["MU"] == MU) &
                       (df["LAMBDA"] == LAMBDA) & (df["dimension"] == DIMENSION)].iterrows():
             print(row)
+
+        plot_results(df, LAMBDA, MU, DIMENSION)
         print("---------------------------------")
+
     # TODO
     # print(kernel.compute(t1, t2))
     # print("penalizing values ", [(k, kernel.dtf_cache[k][1]) for k in kernel.dtf_cache])
