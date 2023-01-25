@@ -59,6 +59,36 @@
       "lambda": 0.6,
       "mu": 0.6,
       "dimension": 300
+    },
+    {
+      "lambda": 1,
+      "mu": 0.7,
+      "dimension": 8192
+    },
+    {
+      "lambda": 1,
+      "mu": 0.7,
+      "dimension": 300
+    },
+    {
+      "lambda": 0.7,
+      "mu": 0.7,
+      "dimension": 8192
+    },
+    {
+      "lambda": 0.7,
+      "mu": 0.7,
+      "dimension": 300
+    },
+    {
+      "lambda": 0.6,
+      "mu": 0.7,
+      "dimension": 8192
+    },
+    {
+      "lambda": 0.6,
+      "mu": 0.7,
+      "dimension": 300
     }
   ],
   "test_hans_dataset.csv": [
@@ -120,6 +150,36 @@
     {
       "lambda": 0.6,
       "mu": 0.6,
+      "dimension": 300
+    },
+    {
+      "lambda": 1,
+      "mu": 0.7,
+      "dimension": 8192
+    },
+    {
+      "lambda": 1,
+      "mu": 0.7,
+      "dimension": 300
+    },
+    {
+      "lambda": 0.7,
+      "mu": 0.7,
+      "dimension": 8192
+    },
+    {
+      "lambda": 0.7,
+      "mu": 0.7,
+      "dimension": 300
+    },
+    {
+      "lambda": 0.6,
+      "mu": 0.7,
+      "dimension": 8192
+    },
+    {
+      "lambda": 0.6,
+      "mu": 0.7,
       "dimension": 300
     }
   ]
