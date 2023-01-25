@@ -72,6 +72,10 @@ class partialTreeKernel(DSE):
         :param node: the input tree
         :return s(node): sum of all of the tree fragments rooted in node
         """
+        if store_substructures and node in self.dtf_cache:
+            (result, penalizing_value) = self.dtf_cache[node]
+            return result
+
         v = self.distributedVector(node.root)
         penalizing_value = 1
 
@@ -140,8 +144,11 @@ class partialTreeKernel(DSE):
         dvalues[k] = result
         return result
 
-    def ds(self, tree):
-        return self.dpt(tree)
+    def ds(self, tree, store_substructures=False):
+        if not store_substructures:
+            return self.dpt(tree)
+        else:
+            return self.dpt_v2(tree)
 
     def dpt(self, tree):
         self.spectrum = np.zeros(self.dimension)
@@ -270,13 +277,20 @@ class partialTreeKernel(DSE):
         return active_in_t, inactive_pt
 
 
+from math import sqrt
+
 if __name__ == "__main__":
     s1 = "(NP (NP (DT A) (NN bunch)) (PP (IN of) (NP (NP (NNS trays)))))"
     s1 = s1.replace(")", ") ").replace("(", " (")
     t1 = Tree(string=s1)
     print(t1)
     kernel = partialTreeKernel(dimension=8192, LAMBDA=0.6, operation=op.fast_shuffled_convolution)
-    kernel.ds(t1)
+
+    # test implementazione diretta con sum e implementazione come in Java
+    dt1 = kernel.ds(t1)
+    dt2 = kernel.ds(t1, store_substructures=True)
+    den = sum([dt1[i] * dt1[i] for i in range(0, len(dt1))]) * sum([dt2[i] * dt2[i] for i in range(0, len(dt1))])
+    print(sum([dt1[i] * dt2[i] for i in range(0, len(dt1))]) / sqrt(den))
 
 
 

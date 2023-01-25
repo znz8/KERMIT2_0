@@ -293,8 +293,9 @@ def test_kernel_and_explicit():
     t1, t2 = Tree(string=s1), Tree(string=s2)
 
     pt_kernel = PT_Kernel()
-    dpt_kernel = partialTreeKernel(dimension=8192, LAMBDA=1.0, operation=op.fast_shuffled_convolution)
     print("pt kernel: ", pt_kernel.kernel_similarity(t1, t2))
+
+    dpt_kernel = partialTreeKernel(dimension=8192, LAMBDA=1.0, operation=op.fast_shuffled_convolution)
     sub_t1 = dpt_kernel.substructures(t1)
     sub_t2 = dpt_kernel.substructures(t2)
 
@@ -307,7 +308,7 @@ def test_kernel_and_explicit():
     print("exp: ", res)
 
 
-def plot_results(df, LAMBDA, MU, DIMENSION):
+def plot_results(df, LAMBDA, MU, DIMENSION, threshold=None):
     if not os.path.exists('vis'):
         os.mkdir('vis')
 
@@ -315,13 +316,18 @@ def plot_results(df, LAMBDA, MU, DIMENSION):
         if not os.path.exists(os.path.join('vis', t)):
             os.mkdir(os.path.join('vis', t))
 
-    x = [x for x in range(0, len(df[(df["MU"] == MU) & (df["LAMBDA"] == LAMBDA) & (df["dimension"] == DIMENSION)]))]
+    #x = [x for x in range(0, len(df[(df["MU"] == MU) & (df["LAMBDA"] == LAMBDA) & (df["dimension"] == DIMENSION)]))]
     for t in ['_count', '_scaled']:
         for o in ['original', 'dpt']:
-            y = df[(df["MU"] == MU) & (df["LAMBDA"] == LAMBDA) & (df["dimension"] == DIMENSION)][o + t]
-            if len(y) > 100:
-                y = df[(df["original_scaled"] > 0.1) & (df["MU"] == MU) & (df["LAMBDA"] == LAMBDA) & (df["dimension"] == DIMENSION)][o + t]
-                x = [i for i in range(0, len(y))]
+            if threshold is not None:
+                y = df[(df["original_scaled"] > threshold) & (df["MU"] == MU) & (df["LAMBDA"] == LAMBDA) & (df["dimension"] == DIMENSION)][o + t]
+            else:
+                y = df[(df["MU"] == MU) & (df["LAMBDA"] == LAMBDA) & (df["dimension"] == DIMENSION)][o + t]
+
+            if len(y)>100:
+                y = y[0:100]
+
+            x = [i for i in range(0, len(y))]
             plt.plot(x, y, label=o + t)
         plt.legend()
         title = f"type{t}_mu_{MU}_lambda_{LAMBDA}_dim_{DIMENSION}"
@@ -338,7 +344,7 @@ if __name__ == "__main__":
 
     params = [
         [1, 0.7, 0.6],
-        [1, 0.6],
+        [1, 0.7, 0.6],
         [8192, 300]
     ]
     for LAMBDA, MU, DIMENSION in itertools.product(*params):
@@ -383,7 +389,7 @@ if __name__ == "__main__":
                       (df["LAMBDA"] == LAMBDA) & (df["dimension"] == DIMENSION)].iterrows():
             print(row)
 
-        plot_results(df, LAMBDA, MU, DIMENSION)
+        plot_results(df, LAMBDA, MU, DIMENSION, threshold=0.1)
         print("---------------------------------")
 
     # TODO
