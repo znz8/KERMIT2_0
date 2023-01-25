@@ -81,23 +81,22 @@ class partialTreeKernel(DSE):
 
         if node.isTerminal() or (not self.lexicalized and node.isPreTerminal()):
             penalizing_value = self._mu * self._terminal_factor
-            result = penalizing_value * v
+            result = np.dot(penalizing_value, v)
         else:
-            result = self._mu * v + self.operation(v,
+            result = np.add(np.dot(self._mu, v), self.operation(v,
                                                    self.operation(
                                                         self.distributedVector("separator"),
                                                         self.d(node.children, store_substructures)
                                                         )
                                                    )
+                             )
 
-        # TODO quale e' qui il penalizing_value?
-        penalizing_value = penalizing_value * np.sqrt(self.LAMBDA)
-        result = penalizing_value * result
+        result = np.dot(np.sqrt(self.LAMBDA), result)
 
-        self.spectrum = self.spectrum + result
+        self.spectrum = np.add(self.spectrum, result)
 
         if store_substructures:
-            self.dtf_cache[node] = (result, penalizing_value)
+            self.dtf_cache[node] = (result, penalizing_value * np.sqrt(self.LAMBDA)) # TODO quale e' qui il penalizing_value?
 
         return result
 
@@ -114,7 +113,7 @@ class partialTreeKernel(DSE):
 
         result = self.__dRecursive(trees, 0, dvalues, store_substructures)
         for k in range(1, len(trees)):
-            result = result + self.__dRecursive(trees, k, dvalues, store_substructures)  # spectrum passato originariamente qui
+            result = np.add(result, self.__dRecursive(trees, k, dvalues, store_substructures))  # spectrum passato originariamente qui
 
         return result
 
@@ -135,9 +134,11 @@ class partialTreeKernel(DSE):
         if k < len(trees) - 1:
             total = self.__dRecursive(trees, k + 1, dvalues, store_substructures)
             for i in range(k + 2, len(trees)):
-                total = total + self.mu_pow(i - k - 1) * self.__dRecursive(trees, i, dvalues, store_substructures)
+                total = np.add(total, np.dot(self.mu_pow(i - k - 1),
+                                             self.__dRecursive(trees, i, dvalues, store_substructures))
+                               )
 
-            result = s_trees_k + self.operation(s_trees_k, total)
+            result = np.add(s_trees_k, self.operation(s_trees_k, total))
         else:
             result = s_trees_k
 
@@ -155,11 +156,10 @@ class partialTreeKernel(DSE):
         self.sRecursive(tree)
         return self.spectrum
 
-    # TODO delete? impl diretta in java... ma hai gia' calcolato spectrum come somma dei result (ciascuno e' s(n))
     def dpt_v2(self, tt: Tree):
         result = np.zeros(self.dimension)
         for n in tt.allNodes():
-            result += self.sRecursive(n, store_substructures=True)
+            result = np.add(result, self.sRecursive(n, store_substructures=True))
         return result
 
     # TODO non ho capito

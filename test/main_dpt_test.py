@@ -147,7 +147,7 @@ def test_in_original_space(input_file, output_path, DIMENSION: int = 8192, opera
 
 
 def test_with_kernel(input_file, output_path, LAMBDA: float = 1., MU: float = 1.,
-                     DIMENSION: int = 8192, operation=op.fast_shuffled_convolution, n=None):
+                     DIMENSION: int = 8192, operation=op.fast_shuffled_convolution, n=None, store_sub=False):
     if Tester.completed_test(input_file, LAMBDA, MU, DIMENSION):
         print(f"Tested already on input_file={input_file}, LAMBDA={LAMBDA}, MU={MU}, DIMENSION={DIMENSION}")
         return
@@ -181,8 +181,8 @@ def test_with_kernel(input_file, output_path, LAMBDA: float = 1., MU: float = 1.
         record["original_scaled"] = scaled
 
         ## Distributed Partial Tree encoder
-        dpt1 = pt_encoder.ds(t1)
-        dpt2 = pt_encoder.ds(t2)
+        dpt1 = pt_encoder.ds(t1, store_substructures=store_sub)
+        dpt2 = pt_encoder.ds(t2, store_substructures=store_sub)
 
         count = np.dot(dpt1, dpt2)
         scaled = count / np.sqrt(np.dot(dpt1, dpt1) * np.dot(dpt2, dpt2))
@@ -345,8 +345,19 @@ if __name__ == "__main__":
     params = [
         [1, 0.7, 0.6],
         [1, 0.7, 0.6],
-        [8192, 300]
+        [10000, 8192, 300]
     ]
+
+    store_sub = False
+    dir = ''
+    if not store_sub:
+        dir = 'not_store_sub'
+    else:
+        dir =  'store_sub'
+
+    if not os.path.exists(dir):
+        os.mkdir(dir)
+
     for LAMBDA, MU, DIMENSION in itertools.product(*params):
 
         on = "caption"
@@ -354,13 +365,14 @@ if __name__ == "__main__":
         if not os.path.exists(input_file):
             Tester.create_test(input_file, on=on)
 
-        out = f"test_{on}_result_vs_original_kernel.csv"
+        out = os.path.join(dir, f"test_{on}_result_vs_original_kernel.csv")
 
         print("---------------------------------")
         print(f"DISTRIBUTED KERNEL vs KERNEL -- {on}")
         test_with_kernel(input_file, output_path=out,
                          LAMBDA=LAMBDA, MU=MU, DIMENSION=DIMENSION,
-                         operation=op.fast_shuffled_convolution
+                         operation=op.fast_shuffled_convolution,
+                         store_sub=store_sub
                          )
 
         df = pd.read_csv(out)
@@ -375,21 +387,21 @@ if __name__ == "__main__":
             Tester.create_test(input_file, on=on)
 
         n = 100
-        out = f"test_{on}_result_vs_original_kernel.csv"
+        out = os.path.join(dir, f"test_{on}_result_vs_original_kernel.csv")
 
         print("---------------------------------")
         print(f"DISTRIBUTED KERNEL vs KERNEL -- {on}")
         test_with_kernel(input_file, output_path=out,
                          LAMBDA=LAMBDA, MU=MU, DIMENSION=DIMENSION,
                          operation=op.fast_shuffled_convolution,
-                         n=n)
+                         n=n, store_sub=store_sub)
 
         df = pd.read_csv(out)
         for row in df[(df["original_scaled"] > 0.2) & (df["MU"] == MU) &
                       (df["LAMBDA"] == LAMBDA) & (df["dimension"] == DIMENSION)].iterrows():
             print(row)
 
-        plot_results(df, LAMBDA, MU, DIMENSION, threshold=0.1)
+        plot_results(df, LAMBDA, MU, DIMENSION)
         print("---------------------------------")
 
     # TODO
