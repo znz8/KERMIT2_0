@@ -348,7 +348,7 @@ if __name__ == "__main__":
         [10000, 8192, 300]
     ]
 
-    store_sub = False
+    store_sub = True
     dir = ''
     if not store_sub:
         dir = 'not_store_sub'
