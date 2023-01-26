@@ -21,7 +21,6 @@ class partialTreeKernel(DSE):
         self.spectrum = np.zeros(self.dimension)
 
         self.__set_terminal_factor(terminal_factor)
-        # TODO perche' MAXPOWER non e' parametrico? anche su java e' 10
         self.__set_mu(MU, MAX_POWER=10)
 
     def cleanCache(self):
@@ -96,7 +95,7 @@ class partialTreeKernel(DSE):
         self.spectrum = np.add(self.spectrum, result)
 
         if store_substructures:
-            self.dtf_cache[node] = (result, penalizing_value * np.sqrt(self.LAMBDA)) # TODO quale e' qui il penalizing_value?
+            self.dtf_cache[node] = (result, penalizing_value * np.sqrt(self.LAMBDA)) #TODO missing weight in that case
 
         return result
 
@@ -162,55 +161,67 @@ class partialTreeKernel(DSE):
             result = np.add(result, self.sRecursive(n, store_substructures=True))
         return result
 
-    # TODO non ho capito
-    def dsf(self, structure: Tree, original: Tree):
-        return self.dsf_with_weight(structure, original)[0]
+    # TODO unclear
+    def dsf(self, structure: Tree, **kwargs):
+        if 'original' not in kwargs:
+            raise Exception("dsf(structure: Tree) cannot be correctly computed by itself for the Partial Tree Kernel!\nUse dsf(structure:Tree, original:Tree) instead!")
 
-    def dsf_with_weight(self, structure: Tree, original: Tree):
-        superTree = self.findSuperTree(structure, original)
+        v, weight = self.dsf_with_weight(structure, original=kwargs['original'])
+        return v
+
+
+    def dsf_with_weight(self, structure: Tree, **kwargs):
+        if 'original' not in kwargs:
+            raise Exception("dsf_with_weight(structure: Tree) cannot be correctly computed by itself for the Partial Tree Kernel!\nUse dsf_with_weight(structure: Tree, original:Tree) instead!")
+
+        original= kwargs['original']
+        superTree = self.__findSuperTree(structure, original)
 
         if superTree is None:
-            raise ValueError("Fragment not found in originary tree!")
+            raise Exception("Fragment structure not found in originary tree!")
 
-        if structure.isTerminal():
+        # TODO check if the right condition on the or must be inserted as above
+        if structure.isTerminal() or (not self.lexicalized and structure.isPreTerminal()):
             # In this case, return value will be mistakenly multiplied by lambdaSq,
             # so it must be divided by lambdaSq to compensate
             penalizing_value = np.sqrt(self.LAMBDA) * self._mu
-            result = penalizing_value * self.distributedVector(structure.root)
+            result = np.dot(penalizing_value, self.distributedVector(structure.root))
         else:
             # The composition order is different from the one of the classic DTK, it is n#(c1#(c2#...#(cn-1#cn)...))
-            result, penalizing_value = self.dsf_with_weight(structure.children[len(structure.children) - 1], superTree)
+            result, _ = self.dsf(structure.children[len(structure.children) - 1], original=superTree)
             for i in range(len(structure.children) - 2, -1, -1):
                 result = self.operation(
-                    self.dsf_with_weight(structure.children[i], superTree)[0],
+                    self.dsf(structure.children[i], original=superTree),
                     result
                 )
 
-            penalizing_value = np.sqrt(self.LAMBDA)
-            result = penalizing_value * self.operation(self.distributedVector(structure.root), result)
+            penalizing_value = np.sqrt(self.LAMBDA) #TODO missing weight in that case
+            result = np.dot(penalizing_value, self.operation(self.distributedVector(structure.root),
+                                                             result)
+                            )
 
         return (result, penalizing_value)
 
-    def findSuperTree(self, fragment: Tree, whole: Tree):
-        if self.isSuperTree(fragment, whole):
+    def __findSuperTree(self, fragment: Tree, whole: Tree):
+        if self.__isSuperTree(fragment, whole):
             return whole
 
         superTree = None
         if not whole.isTerminal():
             for c in whole.children:
                 if superTree is not None:
-                    if self.findSuperTree(fragment, c) is not None:
+                    if self.__findSuperTree(fragment, c) is not None:
                         raise Exception("Tree fragment may refer to multiple subtrees!")
                 else:
-                    superTree = self.findSuperTree(fragment, c)
+                    superTree = self.__findSuperTree(fragment, c)
 
         return superTree
 
-    def isSuperTree(self, fragment: Tree, whole: Tree):
+    def __isSuperTree(self, fragment: Tree, whole: Tree):
         if fragment.root != whole.root:
             return False
 
-        if fragment.isTerminal():
+        if fragment.isTerminal() or (not self.lexicalized and fragment.isPreTerminal()):
             return True
 
         i = -1
@@ -220,17 +231,10 @@ class partialTreeKernel(DSE):
                 if i >= len(whole.children):
                     return False
 
-                if self.isSuperTree(c, whole.children[i]):
+                if self.__isSuperTree(c, whole.children[i]):
                     break
         return True
 
-    ## TODO implementazione diretta se dptf e' "parte" di tutto l'albero... non viene uguale a sopra
-    def dptf_with_weight_v2(self, structure: Tree, original: Tree):
-        self.spectrum = np.zeros(self.dimension)
-        self.dtf_cache = {}
-
-        self.sRecursive(original, store_substructures=True)
-        return self.dtf_cache[structure]
 
     def substructures(self, structure: Tree):
         active_in_root, inactive_in_root = self.__partialtrees(structure)
@@ -292,6 +296,11 @@ if __name__ == "__main__":
     den = sum([dt1[i] * dt1[i] for i in range(0, len(dt1))]) * sum([dt2[i] * dt2[i] for i in range(0, len(dt1))])
     print(sum([dt1[i] * dt2[i] for i in range(0, len(dt1))]) / sqrt(den))
 
+    sub = "(NP (DT A) (NN bunch))"
+    sub = sub.replace(")", ") ").replace("(", " (")
+    subt = Tree(string=sub)
 
+    subdt, weight = kernel.dsf_with_weight(subt, original=t1)
+    print(subdt, weight)
 
 
