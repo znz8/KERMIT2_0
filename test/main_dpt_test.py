@@ -343,17 +343,13 @@ if __name__ == "__main__":
     print("---------------------------------")
 
     params = [
-        [1, 0.7, 0.6],
-        [1, 0.7, 0.6],
+        [1, 0.7, 0.6, 0.5],
+        [1, 0.7, 0.6, 0.5],
         [10000, 8192, 300]
     ]
 
     store_sub = True
-    dir = ''
-    if not store_sub:
-        dir = 'not_store_sub'
-    else:
-        dir =  'store_sub'
+    dir = 'results'
 
     if not os.path.exists(dir):
         os.mkdir(dir)
@@ -386,7 +382,7 @@ if __name__ == "__main__":
         if not os.path.exists(input_file):
             Tester.create_test(input_file, on=on)
 
-        n = 100
+        n = 1000
         out = os.path.join(dir, f"test_{on}_result_vs_original_kernel.csv")
 
         print("---------------------------------")

@@ -46,6 +46,21 @@
       "dimension": 300
     },
     {
+      "lambda": 1,
+      "mu": 0.5,
+      "dimension": 10000
+    },
+    {
+      "lambda": 1,
+      "mu": 0.5,
+      "dimension": 8192
+    },
+    {
+      "lambda": 1,
+      "mu": 0.5,
+      "dimension": 300
+    },
+    {
       "lambda": 0.7,
       "mu": 1,
       "dimension": 10000
@@ -91,6 +106,21 @@
       "dimension": 300
     },
     {
+      "lambda": 0.7,
+      "mu": 0.5,
+      "dimension": 10000
+    },
+    {
+      "lambda": 0.7,
+      "mu": 0.5,
+      "dimension": 8192
+    },
+    {
+      "lambda": 0.7,
+      "mu": 0.5,
+      "dimension": 300
+    },
+    {
       "lambda": 0.6,
       "mu": 1,
       "dimension": 10000
@@ -133,6 +163,81 @@
     {
       "lambda": 0.6,
       "mu": 0.6,
+      "dimension": 300
+    },
+    {
+      "lambda": 0.6,
+      "mu": 0.5,
+      "dimension": 10000
+    },
+    {
+      "lambda": 0.6,
+      "mu": 0.5,
+      "dimension": 8192
+    },
+    {
+      "lambda": 0.6,
+      "mu": 0.5,
+      "dimension": 300
+    },
+    {
+      "lambda": 0.5,
+      "mu": 1,
+      "dimension": 10000
+    },
+    {
+      "lambda": 0.5,
+      "mu": 1,
+      "dimension": 8192
+    },
+    {
+      "lambda": 0.5,
+      "mu": 1,
+      "dimension": 300
+    },
+    {
+      "lambda": 0.5,
+      "mu": 0.7,
+      "dimension": 10000
+    },
+    {
+      "lambda": 0.5,
+      "mu": 0.7,
+      "dimension": 8192
+    },
+    {
+      "lambda": 0.5,
+      "mu": 0.7,
+      "dimension": 300
+    },
+    {
+      "lambda": 0.5,
+      "mu": 0.6,
+      "dimension": 10000
+    },
+    {
+      "lambda": 0.5,
+      "mu": 0.6,
+      "dimension": 8192
+    },
+    {
+      "lambda": 0.5,
+      "mu": 0.6,
+      "dimension": 300
+    },
+    {
+      "lambda": 0.5,
+      "mu": 0.5,
+      "dimension": 10000
+    },
+    {
+      "lambda": 0.5,
+      "mu": 0.5,
+      "dimension": 8192
+    },
+    {
+      "lambda": 0.5,
+      "mu": 0.5,
       "dimension": 300
     }
   ],
@@ -183,6 +288,21 @@
       "dimension": 300
     },
     {
+      "lambda": 1,
+      "mu": 0.5,
+      "dimension": 10000
+    },
+    {
+      "lambda": 1,
+      "mu": 0.5,
+      "dimension": 8192
+    },
+    {
+      "lambda": 1,
+      "mu": 0.5,
+      "dimension": 300
+    },
+    {
       "lambda": 0.7,
       "mu": 1,
       "dimension": 10000
@@ -228,6 +348,21 @@
       "dimension": 300
     },
     {
+      "lambda": 0.7,
+      "mu": 0.5,
+      "dimension": 10000
+    },
+    {
+      "lambda": 0.7,
+      "mu": 0.5,
+      "dimension": 8192
+    },
+    {
+      "lambda": 0.7,
+      "mu": 0.5,
+      "dimension": 300
+    },
+    {
       "lambda": 0.6,
       "mu": 1,
       "dimension": 10000
@@ -270,6 +405,81 @@
     {
       "lambda": 0.6,
       "mu": 0.6,
+      "dimension": 300
+    },
+    {
+      "lambda": 0.6,
+      "mu": 0.5,
+      "dimension": 10000
+    },
+    {
+      "lambda": 0.6,
+      "mu": 0.5,
+      "dimension": 8192
+    },
+    {
+      "lambda": 0.6,
+      "mu": 0.5,
+      "dimension": 300
+    },
+    {
+      "lambda": 0.5,
+      "mu": 1,
+      "dimension": 10000
+    },
+    {
+      "lambda": 0.5,
+      "mu": 1,
+      "dimension": 8192
+    },
+    {
+      "lambda": 0.5,
+      "mu": 1,
+      "dimension": 300
+    },
+    {
+      "lambda": 0.5,
+      "mu": 0.7,
+      "dimension": 10000
+    },
+    {
+      "lambda": 0.5,
+      "mu": 0.7,
+      "dimension": 8192
+    },
+    {
+      "lambda": 0.5,
+      "mu": 0.7,
+      "dimension": 300
+    },
+    {
+      "lambda": 0.5,
+      "mu": 0.6,
+      "dimension": 10000
+    },
+    {
+      "lambda": 0.5,
+      "mu": 0.6,
+      "dimension": 8192
+    },
+    {
+      "lambda": 0.5,
+      "mu": 0.6,
+      "dimension": 300
+    },
+    {
+      "lambda": 0.5,
+      "mu": 0.5,
+      "dimension": 10000
+    },
+    {
+      "lambda": 0.5,
+      "mu": 0.5,
+      "dimension": 8192
+    },
+    {
+      "lambda": 0.5,
+      "mu": 0.5,
       "dimension": 300
     }
   ]
