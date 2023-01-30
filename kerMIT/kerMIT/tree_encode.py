@@ -89,7 +89,7 @@ def to_str_visit(adj, root, visited):
     for child in children:
         tree_str = tree_str + "(" + child['dep']
         if child['dependent'] in adj:
-            tree_str = tree_str +" ( (gloss "+ child['dependentGloss'] + " ) "+ to_str_visit(adj, child['dependent'], visited) +" ))"
+            tree_str = tree_str +" (gloss "+ child['dependentGloss'] + " ) "+ to_str_visit(adj, child['dependent'], visited) +")"
         else:
             tree_str = tree_str +" (gloss "+ child['dependentGloss'] +" ))"
 
@@ -100,6 +100,16 @@ def to_str_visit(adj, root, visited):
 if __name__ == "__main__":
     nlp = StanfordCoreNLP('/stanford-corenlp-full-2018-10-05')
 
-    text = "This time around, they're moving even faster. Who are they?"
+    text = "The cat is on the table"
+    tree_str = parse(text, nlp=nlp, annotator='depparse')
+    print(tree_str)
+
+
+    text = "The cat sleeps on the table"
+    tree_str = parse(text, nlp=nlp, annotator='depparse')
+    print(tree_str)
+
+
+    text = "This time around, they're moving even faster."
     tree_str = parse(text, nlp=nlp, annotator='depparse')
     print(tree_str)
