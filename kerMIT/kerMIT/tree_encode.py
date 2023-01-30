@@ -60,7 +60,9 @@ def parse(text, nlp=None, **kwargs):
                 inner_nodes = {d['governor'] for d in dependencies}
                 adj_matrix={
                     node:sorted([d for d in dependencies if d['governor'] == node],
-                                key=lambda d: d['dep']) for node in inner_nodes}
+                                key=lambda d: d['dep'])
+                    for node in inner_nodes
+                }
                 tree_str = to_str_visit(adj_matrix, 0, set())
                 trees.append(tree_str)
 
