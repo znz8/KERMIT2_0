@@ -146,9 +146,9 @@ def test_in_original_space(input_file, output_path, DIMENSION: int = 8192, opera
     df.to_csv(output_path, mode='a', header=not os.path.exists(output_path))
 
 
-def test_with_kernel(input_file, output_path, LAMBDA: float = 1., MU: float = 1.,
+def test_with_kernel(input_file, output_path, mode, LAMBDA: float = 1., MU: float = 1.,
                      DIMENSION: int = 8192, operation=op.fast_shuffled_convolution, n=None, store_sub=False):
-    if Tester.completed_test(input_file, LAMBDA, MU, DIMENSION):
+    if Tester.completed_test(input_file, mode, LAMBDA, MU, DIMENSION):
         print(f"Tested already on input_file={input_file}, LAMBDA={LAMBDA}, MU={MU}, DIMENSION={DIMENSION}")
         return
 
@@ -195,10 +195,10 @@ def test_with_kernel(input_file, output_path, LAMBDA: float = 1., MU: float = 1.
     df["dimension"] = DIMENSION
     df["LAMBDA"] = LAMBDA
     df["MU"] = MU
-
+    df["mode"] = mode
     df.to_csv(output_path, mode='a', header=not os.path.exists(output_path))
 
-    Tester.add_to_config(input_file, LAMBDA, MU, DIMENSION)
+    Tester.add_to_config(input_file, mode, LAMBDA, MU, DIMENSION)
 
 
 class Tester:
@@ -206,31 +206,31 @@ class Tester:
     config = json.load(open("config.json"))
 
     @staticmethod
-    def add_to_config(on, LAMBDA, mu, dimension):
+    def add_to_config(on, mode, LAMBDA, mu, dimension):
         if on not in Tester.config:
             Tester.config[on] = []
 
-        Tester.config[on].append({"lambda": LAMBDA, "mu": mu, "dimension": dimension})
+        Tester.config[on].append({"mode": mode, "lambda": LAMBDA, "mu": mu, "dimension": dimension})
         json.dump(Tester.config, open("config.json", 'w'), indent=2)
 
     @staticmethod
-    def completed_test(on, LAMBDA, mu, dimension):
+    def completed_test(on, mode, LAMBDA, mu, dimension):
         if on not in Tester.config:
             return False
         for lm in Tester.config[on]:
-            if lm["lambda"] == LAMBDA and lm["mu"] == mu and lm["dimension"] == dimension:
+            if lm["mode"] == mode and lm["lambda"] == LAMBDA and lm["mu"] == mu and lm["dimension"] == dimension:
                 return True
         return False
 
     @staticmethod
-    def create_test(output, on="caption"):
+    def create_test(output, mode, on="caption"):
         if on == "caption":
-            Tester.__test_on_caption(output)
+            Tester.__test_on_caption(output, mode)
         if on == "hans_dataset":
-            Tester.__test_on_hans(output)
+            Tester.__test_on_hans(output, mode)
 
     @staticmethod
-    def __test_on_caption(output):
+    def __test_on_caption(output, mode):
         input_path = "data/caption/captions_train2014.json"
 
         fd = open(input_path, "r")
@@ -244,17 +244,23 @@ class Tester:
         for i in range(0, 20, 2):
             s1 = captions.values[i]
             s2 = captions.values[i + 1]
-            t1 = parse(s1, nlp=Tester.nlp).replace('\r', '').replace('\t', ' ')
-            t2 = parse(s2, nlp=Tester.nlp).replace('\r', '').replace('\t', ' ')
+            t1 = parse(s1, nlp=Tester.nlp, annotator=mode).replace('\r', '').replace('\t', ' ')
+            t2 = parse(s2, nlp=Tester.nlp, annotator=mode).replace('\r', '').replace('\t', ' ')
 
             test.append({"s1": t1, "s2": t2})
 
         pd.DataFrame(test).to_csv(output)
 
     @staticmethod
-    def __test_on_hans(output):
+    def __test_on_hans(output, mode):
         test = []
-        sentences = pd.read_csv("data/hans_dataset/dataset_SHORT_4_Aria.csv")["sentence_parse"]
+
+        if mode == "parse":
+            sentences = pd.read_csv("data/hans_dataset/dataset_SHORT_4_Aria.csv")
+            sentences = sentences["sentence_parse"]
+        else:
+            sentences = pd.read_csv("data/hans_dataset/dataset_SHORT_4_Aria_dep.csv")
+            sentences = sentences["sentence_depparse"]
 
         print(sentences)
         for file in os.listdir("data/hans_dataset/hans_pattern"):
@@ -308,7 +314,7 @@ def test_kernel_and_explicit():
     print("exp: ", res)
 
 
-def plot_results(df, LAMBDA, MU, DIMENSION, threshold=None):
+def plot_results(df, mode, LAMBDA, MU, DIMENSION, threshold=None):
     if not os.path.exists('vis'):
         os.mkdir('vis')
 
@@ -320,9 +326,11 @@ def plot_results(df, LAMBDA, MU, DIMENSION, threshold=None):
     for t in ['_count', '_scaled']:
         for o in ['original', 'dpt']:
             if threshold is not None:
-                y = df[(df["original_scaled"] > threshold) & (df["MU"] == MU) & (df["LAMBDA"] == LAMBDA) & (df["dimension"] == DIMENSION)][o + t]
+                y = df[(df["original_scaled"] > threshold) & (df["mode"] == mode) &
+                       (df["MU"] == MU) & (df["LAMBDA"] == LAMBDA) & (df["dimension"] == DIMENSION)][o + t]
             else:
-                y = df[(df["MU"] == MU) & (df["LAMBDA"] == LAMBDA) & (df["dimension"] == DIMENSION)][o + t]
+                y = df[(df["mode"] == mode) & (df["MU"] == MU) &
+                       (df["LAMBDA"] == LAMBDA) & (df["dimension"] == DIMENSION)][o + t]
 
             if len(y)>100:
                 y = y[0:100]
@@ -330,17 +338,19 @@ def plot_results(df, LAMBDA, MU, DIMENSION, threshold=None):
             x = [i for i in range(0, len(y))]
             plt.plot(x, y, label=o + t)
         plt.legend()
-        title = f"type{t}_mu_{MU}_lambda_{LAMBDA}_dim_{DIMENSION}"
+        title = f"type{t}_mode_{mode}_mu_{MU}_lambda_{LAMBDA}_dim_{DIMENSION}"
         plt.title(title)
         plt.savefig(os.path.join('vis', t, title+'.png'))
         plt.close()
 
 
 if __name__ == "__main__":
-    print("---------------------------------")
-    print("KERNEL vs FRAGMENTS SPACE")
-    test_kernel_and_explicit()
-    print("---------------------------------")
+    mode = "depparse"
+    if mode == "parse":
+        print("---------------------------------")
+        print("KERNEL vs FRAGMENTS SPACE")
+        test_kernel_and_explicit()
+        print("---------------------------------")
 
     params = [
         [1, 0.7, 0.6, 0.5],
@@ -349,23 +359,25 @@ if __name__ == "__main__":
     ]
 
     store_sub = True
-    dir = 'results'
 
-    if not os.path.exists(dir):
-        os.mkdir(dir)
+    if not os.path.exists(mode):
+        os.mkdir(mode)
+
+    if not os.path.exists("results_" + mode):
+        os.mkdir("results_" + mode)
 
     for LAMBDA, MU, DIMENSION in itertools.product(*params):
-
         on = "caption"
-        input_file = f"test_{on}.csv"
-        if not os.path.exists(input_file):
-            Tester.create_test(input_file, on=on)
 
-        out = os.path.join(dir, f"test_{on}_result_vs_original_kernel.csv")
+        input_file = os.path.join(mode, f"test_{on}.csv")
+        if not os.path.exists(input_file):
+            Tester.create_test(input_file, mode=mode, on=on)
+
+        out = os.path.join("results_"+mode, f"test_{on}_result_vs_original_kernel.csv")
 
         print("---------------------------------")
         print(f"DISTRIBUTED KERNEL vs KERNEL -- {on}")
-        test_with_kernel(input_file, output_path=out,
+        test_with_kernel(input_file, output_path=out, mode=mode,
                          LAMBDA=LAMBDA, MU=MU, DIMENSION=DIMENSION,
                          operation=op.fast_shuffled_convolution,
                          store_sub=store_sub
@@ -378,16 +390,16 @@ if __name__ == "__main__":
         print("---------------------------------")
 
         on = "hans_dataset"
-        input_file = f"test_{on}.csv"
+        input_file = os.path.join(mode, f"test_{on}.csv")
         if not os.path.exists(input_file):
-            Tester.create_test(input_file, on=on)
+            Tester.create_test(input_file, mode=mode, on=on)
 
         n = 1000
-        out = os.path.join(dir, f"test_{on}_result_vs_original_kernel.csv")
+        out = os.path.join("results_"+mode, f"test_{on}_result_vs_original_kernel.csv")
 
         print("---------------------------------")
         print(f"DISTRIBUTED KERNEL vs KERNEL -- {on}")
-        test_with_kernel(input_file, output_path=out,
+        test_with_kernel(input_file, output_path=out, mode=mode,
                          LAMBDA=LAMBDA, MU=MU, DIMENSION=DIMENSION,
                          operation=op.fast_shuffled_convolution,
                          n=n, store_sub=store_sub)
@@ -397,7 +409,7 @@ if __name__ == "__main__":
                       (df["LAMBDA"] == LAMBDA) & (df["dimension"] == DIMENSION)].iterrows():
             print(row)
 
-        plot_results(df, LAMBDA, MU, DIMENSION)
+        plot_results(df, mode, LAMBDA, MU, DIMENSION)
         print("---------------------------------")
 
     # TODO
