@@ -101,7 +101,6 @@ class Tree:
 
     def parse(self, string):
         p = Tree.biggestPars(string)
-
         if len(p) == 1:
             if p[0].count("(") == 1 and p[0].count(")") == 1:
                 root, _, child = p[0].partition(" ")
@@ -113,10 +112,19 @@ class Tree:
                 children = []
                 self.root = root[1:]
 
-                for c in Tree.biggestPars(rest):
+                lex, _, lex_rest = rest.partition(" (")
+                lex = str.strip(lex)
+                if len(lex) > 0 and "(" not in lex and ")" not in lex:
+                    nt = Tree(root=lex, parent=self._id)
+                    children.append(nt)
+
+                # TODO make it clear
+                pars_children = Tree.biggestPars(rest)
+                for c in pars_children:
                     #nt = parse(c)
                     nt = Tree(string=c, parent=self._id)
                     children.append(nt)
+
                 self.children = children
 
     def __eq__(self, other):
@@ -362,6 +370,12 @@ class Tree:
 
 
 if __name__ == "__main__":
+    treedepp = '(ROOT sleeps (nsubj cat (det The)) (nmod table (case on) (det the)))'
+    t = Tree(string=treedepp)
+    print(t)
+    print(t.children)
+    print ('---')
+
     treeString4 = "(S (@S (@S (@S (INTJ no) (, ,)) (NP it)) (VP (@VP (VBD was) (RB n't)) (NP (NNP black) (NNP monday)))) (. .))"
     t = Tree(string=treeString4)
     tt = t.removeWords()
