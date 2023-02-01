@@ -112,13 +112,13 @@ class Tree:
                 children = []
                 self.root = root[1:]
 
+                # TODO make it clear
                 lex, _, lex_rest = rest.partition(" (")
                 lex = str.strip(lex)
                 if len(lex) > 0 and "(" not in lex and ")" not in lex:
                     nt = Tree(root=lex, parent=self._id)
                     children.append(nt)
 
-                # TODO make it clear
                 pars_children = Tree.biggestPars(rest)
                 for c in pars_children:
                     #nt = parse(c)
