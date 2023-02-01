@@ -47,8 +47,8 @@ class ActivationSubtreeLRP:
 
     def generateMatrixSubTree(self):
         '''
-        It takes the elements of the DT in cache and creates a matrix (N, D), where N is the number of subtrees
-        :param kernel: DT
+        It takes the elements of the DTE in cache and creates a matrix (N, D), where N is the number of subtrees
+        :param kernel: DTE
         :return: M: np.array
         '''
         return np.array([dd for k, dd in self.kernel.dtf_cache.items()])
@@ -204,7 +204,7 @@ class ActivationSubtreeLRP:
 
 if __name__ == "__main__":
 
-    kernel = DT(dimension=4000, LAMBDA=0.4, operation=op.fast_shuffled_convolution)
+    kernel = DTE(dimension=4000, LAMBDA=0.4, operation=op.fast_shuffled_convolution)
     interpretation = 'general' # quale modello voglio interpretare
 
     # apro il file con l'esempio da ispezionare ed estraggo primo tree1, tree2, relevance
