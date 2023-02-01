@@ -162,7 +162,7 @@ class DTE(DSE):
             baseChildrenList = [[]]
             for child in tree.children:
                 newBaseChildrenList = []
-                c_setOfTrees, c_setOfSubtrees = DTE.subtrees(child)
+                c_setOfTrees, c_setOfSubtrees = DTE.subtrees(self,child)
                 setOfSubTrees = setOfSubTrees + c_setOfSubtrees
                 for treeSubChild in c_setOfTrees:
                    for treeSub in baseChildrenList:
