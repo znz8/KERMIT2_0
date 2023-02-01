@@ -1,7 +1,7 @@
 import numpy as np
 from kerMIT import operation as op
 from kerMIT.tree import Tree
-from kerMIT.dtk import DT
+from kerMIT.dte import DTE
 
 
 class ActivationSubtreeLRP:
@@ -41,7 +41,7 @@ class ActivationSubtreeLRP:
         :param tree: str
         :return: 
         '''
-        for tt in DT.subtrees(tree)[1]:
+        for tt in DTE.subtrees(tree)[1]:
            self.kernel.dtf(tt)
 
     def generateMatrixSubTree(self):
