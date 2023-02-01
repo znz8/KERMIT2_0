@@ -97,7 +97,7 @@ class ActivationSubtreeLRP:
         :return: {'tree': str(tree), 'act_sub_trees':[(alberello, np.array())]}
         '''
         # per ogni sottoalbero estraggo il valore di rilevanza e lo metto in un dizionario
-        return {'tree': tree, 'act_sub_trees': [[subtree, np.array([relevance_tree[tree_index_dict[subtree]]], dtype=np.float32)] for subtree in DT.subtrees(tree)[1]]}
+        return {'tree': tree, 'act_sub_trees': [[subtree, np.array([relevance_tree[tree_index_dict[subtree]]], dtype=np.float32)] for subtree in DTE.subtrees(self,tree)[1]]}
 
     def activation(self, relevance, tree):
         '''
