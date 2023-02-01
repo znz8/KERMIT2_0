@@ -2,7 +2,8 @@
 from nltk.draw.util import CanvasFrame
 from kerMIT.utils import tree_visualizer as tv
 from kerMIT.tree import Tree
-from kerMIT.dte import DTE
+from kerMIT.structenc import dte
+from kerMIT.structenc.dte import DTE
 import random as r
 
 def activationsVisualizer(tree,subtrees_with_activations,cf):
