@@ -2,7 +2,7 @@
 from nltk.draw.util import CanvasFrame
 from kerMIT.utils import tree_visualizer as tv
 from kerMIT.tree import Tree
-from kerMIT.dtk import DT
+from kerMIT.dte import DTE
 import random as r
 
 def activationsVisualizer(tree,subtrees_with_activations,cf):
@@ -80,7 +80,7 @@ if __name__ == "__main__":
     #t = Tree.fromstring('(S (NP:red this pippo) (VP (V is) (AdjP pretty)))')
     t = Tree(string='(S (NP this pippo) (VP (V is) (AdjP pretty)))')
 
-    (_,subtrees) = DT.subtrees(t)
+    (_,subtrees) = DTE.subtrees(self,t)
     r.seed(10)
 
     swa = [(st,[r.random(),r.random(),r.random()]) for st in subtrees]
