@@ -2,6 +2,7 @@ import numpy as np
 from kerMIT import operation as op
 from kerMIT.tree import Tree
 from kerMIT.structenc import dte
+from kerMIT.structenc.dte import DTE
 
 
 
@@ -25,7 +26,7 @@ class ActivationSubtreeLRP:
         embedding_matrix = []
         weights = []
         count = 0
-        for k in DTE.subtrees(tree)[1]:
+        for k in DTE.subtrees(self,tree)[1]:
             (dd, w) = self.kernel.dtf_and_weight(k)
             tree_index[k] = dd
             tree_index_dict[k] = count
