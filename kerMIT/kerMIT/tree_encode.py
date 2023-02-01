@@ -1,7 +1,5 @@
-import pandas as pd
-
 import numpy as np
-
+from kerMIT.tree import Tree
 from stanfordcorenlp import StanfordCoreNLP
 import ast
 import time
@@ -52,51 +50,122 @@ def parse(text, nlp=None, **kwargs):
             return root.replace("\n", "")
 
         if annotator == 'depparse':
-
             trees = []
             for i in range(len(sentences)):
                 dependencies = sentences[i]['basicDependencies']
+                tokens = sentences[i]['tokens']
 
-                inner_nodes = {d['governor'] for d in dependencies}
-                adj_matrix={
-                    node:sorted([d for d in dependencies if d['governor'] == node],
-                                key=lambda d: d['dep'])
-                    for node in inner_nodes
-                }
-                tree_str = to_str_visit(adj_matrix, 0, set())
-                trees.append(tree_str)
+                pos_tags = False
+                if 'pos_tags' in kwargs:
+                    pos_tags=kwargs['pos_tags']
+
+                root = min([d['governor'] for d in dependencies])
+                parsing = ParseDependencies(root, dependencies, tokens, pos_tags=pos_tags)
+
+                tokens_as_leaves = False
+                if 'tokens_as_leaves' in kwargs:
+                    tokens_as_leaves = kwargs['tokens_as_leaves']
+                tree = parsing.tree(tokens_as_leaves=tokens_as_leaves)
+                trees.append(tree)
 
             if len(sentences) == 1:
-                return trees[0]
+                return str(trees[0])
             else:
-                return "(ROOT1 " + " ".join(trees) + ")"
-
+                return str(Tree(root="ROOT", children=trees))
 
     except Exception as e:
+        print("Exception occurred during parsing")
         print(e)
-        print("Except")
         if annotator == 'parse':
-            return "(S)"
+            return '(S)'
         elif annotator == 'depparse':
-            return "(ROOT)"
+            return '(ROOT)'
 
-def to_str_visit(adj, root, visited):
-    if root in visited:
-        return ""
+class ParseDependencies:
+    def __init__(self, root, dependencies, tokens, **kwargs):
+        self.dependencies = dependencies
+        self.tokens = {token["index"]: token for token in tokens}
+        self.root = root
 
-    visited.add(root)
-    children = adj[root]
+        self._pos_tags = False
+        if "pos_tags" in kwargs:
+            self._pos_tags = kwargs["pos_tags"]
 
-    tree_str = ""
-    for child in children:
-        tree_str = tree_str + "(" + child['dep']
-        if child['dependent'] in adj:
-            tree_str = tree_str +" (gloss "+ child['dependentGloss'] + " ) "+ to_str_visit(adj, child['dependent'], visited) +")"
+        self.nodes = self._nodes()
+        self.adj = self._adj()
+
+    def _find_dependency(self, idx):
+        for d in self.dependencies:
+            if d["dependent"] == idx: # TODO one root per word
+                return {"label": d["dep"], "token": d["dependentGloss"]}
+
+
+    def _nodes(self):
+        nodes = {}
+        for idx in self.tokens:
+            nodes[idx] = self._find_dependency(idx)
+            if self._pos_tags:
+                nodes[idx]["pos"] = self.tokens[idx]['pos']
+        return nodes
+
+    def _adj(self):
+        children = sorted([dep for dep in self.dependencies if dep["governor"] == self.root], key=lambda dep: dep['dep'])
+        adj = {self.root: [dep["dependent"] for dep in children]}
+        for token in self.tokens:
+            children = sorted([dep for dep in self.dependencies if dep["governor"] == token], key=lambda dep: dep['dep'])
+            adj[token] = [dep["dependent"] for dep in children]
+        return adj
+
+    def to_str(self, tokens_as_leaves=True):
+        return str(self.tree(tokens_as_leaves=tokens_as_leaves))
+
+    def tree(self, tokens_as_leaves=True) -> Tree:
+        if tokens_as_leaves:
+            return self._rec_tree(self.root)
         else:
-            tree_str = tree_str +" (gloss "+ child['dependentGloss'] +" ))"
+            return self._rec_tree_with_tokens(self.root)
 
-        visited.add(child['dependent'])
-    return tree_str
+    def _rec_tree(self, root):
+        if root in self.nodes:
+            if not self._pos_tags:
+                tree = Tree(root=self.nodes[root]['label'], children=[Tree(root=self.nodes[root]['token'])])
+            else:
+                tree = Tree(root=self.nodes[root]['label'], children=[Tree(root=self.nodes[root]['pos'],
+                                                                           children=[Tree(root=self.nodes[root]['token'])])
+                                                                      ]
+                            )
+            for child in self.adj[root]:
+                tree.children.append(self._rec_tree(child))
+
+        else:
+            if root == self.root:
+                child = self.adj[root][0]
+                tree = self._rec_tree(child)
+            else:
+                raise Exception(f"Unkown node {root}")
+        return tree
+
+    def _rec_tree_with_tokens(self, root):
+        tree = None
+        if root in self.nodes:
+            if not self._pos_tags:
+                tree = Tree(root=self.nodes[root]['label'], children=[Tree(root=self.nodes[root]['token'])])
+            else:
+                tree = Tree(root=self.nodes[root]['label'], children=[Tree(root=self.nodes[root]['pos'],
+                                                                           children=[Tree(root=self.nodes[root]['token'])])
+                                                                      ])
+            if len(self.adj[root]) > 0:
+                tree.children[0].children =[]
+                for child in self.adj[root]:
+                    tree.children[0].children.append(self._rec_tree_with_tokens(child))
+        else:
+            if root == self.root:
+                child = self.adj[root][0]
+                tree = self._rec_tree_with_tokens(child)
+            else:
+                raise Exception(f"Unkown node {root}")
+
+        return tree
 
 
 if __name__ == "__main__":
