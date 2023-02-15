@@ -1,1 +1,582 @@
-{}
+{
+  "depparse\\test_caption.csv": [
+    {
+      "mode": "depparse",
+      "lambda": 1,
+      "mu": 1,
+      "dimension": 10000
+    },
+    {
+      "mode": "depparse",
+      "lambda": 1,
+      "mu": 1,
+      "dimension": 8192
+    },
+    {
+      "mode": "depparse",
+      "lambda": 1,
+      "mu": 1,
+      "dimension": 300
+    },
+    {
+      "mode": "depparse",
+      "lambda": 1,
+      "mu": 0.7,
+      "dimension": 10000
+    },
+    {
+      "mode": "depparse",
+      "lambda": 1,
+      "mu": 0.7,
+      "dimension": 8192
+    },
+    {
+      "mode": "depparse",
+      "lambda": 1,
+      "mu": 0.7,
+      "dimension": 300
+    },
+    {
+      "mode": "depparse",
+      "lambda": 1,
+      "mu": 0.6,
+      "dimension": 10000
+    },
+    {
+      "mode": "depparse",
+      "lambda": 1,
+      "mu": 0.6,
+      "dimension": 8192
+    },
+    {
+      "mode": "depparse",
+      "lambda": 1,
+      "mu": 0.6,
+      "dimension": 300
+    },
+    {
+      "mode": "depparse",
+      "lambda": 1,
+      "mu": 0.5,
+      "dimension": 10000
+    },
+    {
+      "mode": "depparse",
+      "lambda": 1,
+      "mu": 0.5,
+      "dimension": 8192
+    },
+    {
+      "mode": "depparse",
+      "lambda": 1,
+      "mu": 0.5,
+      "dimension": 300
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.7,
+      "mu": 1,
+      "dimension": 10000
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.7,
+      "mu": 1,
+      "dimension": 8192
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.7,
+      "mu": 1,
+      "dimension": 300
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.7,
+      "mu": 0.7,
+      "dimension": 10000
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.7,
+      "mu": 0.7,
+      "dimension": 8192
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.7,
+      "mu": 0.7,
+      "dimension": 300
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.7,
+      "mu": 0.6,
+      "dimension": 10000
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.7,
+      "mu": 0.6,
+      "dimension": 8192
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.7,
+      "mu": 0.6,
+      "dimension": 300
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.7,
+      "mu": 0.5,
+      "dimension": 10000
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.7,
+      "mu": 0.5,
+      "dimension": 8192
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.7,
+      "mu": 0.5,
+      "dimension": 300
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.6,
+      "mu": 1,
+      "dimension": 10000
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.6,
+      "mu": 1,
+      "dimension": 8192
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.6,
+      "mu": 1,
+      "dimension": 300
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.6,
+      "mu": 0.7,
+      "dimension": 10000
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.6,
+      "mu": 0.7,
+      "dimension": 8192
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.6,
+      "mu": 0.7,
+      "dimension": 300
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.6,
+      "mu": 0.6,
+      "dimension": 10000
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.6,
+      "mu": 0.6,
+      "dimension": 8192
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.6,
+      "mu": 0.6,
+      "dimension": 300
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.6,
+      "mu": 0.5,
+      "dimension": 10000
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.6,
+      "mu": 0.5,
+      "dimension": 8192
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.6,
+      "mu": 0.5,
+      "dimension": 300
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.5,
+      "mu": 1,
+      "dimension": 10000
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.5,
+      "mu": 1,
+      "dimension": 8192
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.5,
+      "mu": 1,
+      "dimension": 300
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.5,
+      "mu": 0.7,
+      "dimension": 10000
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.5,
+      "mu": 0.7,
+      "dimension": 8192
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.5,
+      "mu": 0.7,
+      "dimension": 300
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.5,
+      "mu": 0.6,
+      "dimension": 10000
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.5,
+      "mu": 0.6,
+      "dimension": 8192
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.5,
+      "mu": 0.6,
+      "dimension": 300
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.5,
+      "mu": 0.5,
+      "dimension": 10000
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.5,
+      "mu": 0.5,
+      "dimension": 8192
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.5,
+      "mu": 0.5,
+      "dimension": 300
+    }
+  ],
+  "depparse\\test_hans_dataset.csv": [
+    {
+      "mode": "depparse",
+      "lambda": 1,
+      "mu": 1,
+      "dimension": 10000
+    },
+    {
+      "mode": "depparse",
+      "lambda": 1,
+      "mu": 1,
+      "dimension": 8192
+    },
+    {
+      "mode": "depparse",
+      "lambda": 1,
+      "mu": 1,
+      "dimension": 300
+    },
+    {
+      "mode": "depparse",
+      "lambda": 1,
+      "mu": 0.7,
+      "dimension": 10000
+    },
+    {
+      "mode": "depparse",
+      "lambda": 1,
+      "mu": 0.7,
+      "dimension": 8192
+    },
+    {
+      "mode": "depparse",
+      "lambda": 1,
+      "mu": 0.7,
+      "dimension": 300
+    },
+    {
+      "mode": "depparse",
+      "lambda": 1,
+      "mu": 0.6,
+      "dimension": 10000
+    },
+    {
+      "mode": "depparse",
+      "lambda": 1,
+      "mu": 0.6,
+      "dimension": 8192
+    },
+    {
+      "mode": "depparse",
+      "lambda": 1,
+      "mu": 0.6,
+      "dimension": 300
+    },
+    {
+      "mode": "depparse",
+      "lambda": 1,
+      "mu": 0.5,
+      "dimension": 10000
+    },
+    {
+      "mode": "depparse",
+      "lambda": 1,
+      "mu": 0.5,
+      "dimension": 8192
+    },
+    {
+      "mode": "depparse",
+      "lambda": 1,
+      "mu": 0.5,
+      "dimension": 300
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.7,
+      "mu": 1,
+      "dimension": 10000
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.7,
+      "mu": 1,
+      "dimension": 8192
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.7,
+      "mu": 1,
+      "dimension": 300
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.7,
+      "mu": 0.7,
+      "dimension": 10000
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.7,
+      "mu": 0.7,
+      "dimension": 8192
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.7,
+      "mu": 0.7,
+      "dimension": 300
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.7,
+      "mu": 0.6,
+      "dimension": 10000
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.7,
+      "mu": 0.6,
+      "dimension": 8192
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.7,
+      "mu": 0.6,
+      "dimension": 300
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.7,
+      "mu": 0.5,
+      "dimension": 10000
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.7,
+      "mu": 0.5,
+      "dimension": 8192
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.7,
+      "mu": 0.5,
+      "dimension": 300
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.6,
+      "mu": 1,
+      "dimension": 10000
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.6,
+      "mu": 1,
+      "dimension": 8192
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.6,
+      "mu": 1,
+      "dimension": 300
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.6,
+      "mu": 0.7,
+      "dimension": 10000
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.6,
+      "mu": 0.7,
+      "dimension": 8192
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.6,
+      "mu": 0.7,
+      "dimension": 300
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.6,
+      "mu": 0.6,
+      "dimension": 10000
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.6,
+      "mu": 0.6,
+      "dimension": 8192
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.6,
+      "mu": 0.6,
+      "dimension": 300
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.6,
+      "mu": 0.5,
+      "dimension": 10000
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.6,
+      "mu": 0.5,
+      "dimension": 8192
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.6,
+      "mu": 0.5,
+      "dimension": 300
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.5,
+      "mu": 1,
+      "dimension": 10000
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.5,
+      "mu": 1,
+      "dimension": 8192
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.5,
+      "mu": 1,
+      "dimension": 300
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.5,
+      "mu": 0.7,
+      "dimension": 10000
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.5,
+      "mu": 0.7,
+      "dimension": 8192
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.5,
+      "mu": 0.7,
+      "dimension": 300
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.5,
+      "mu": 0.6,
+      "dimension": 10000
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.5,
+      "mu": 0.6,
+      "dimension": 8192
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.5,
+      "mu": 0.6,
+      "dimension": 300
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.5,
+      "mu": 0.5,
+      "dimension": 10000
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.5,
+      "mu": 0.5,
+      "dimension": 8192
+    },
+    {
+      "mode": "depparse",
+      "lambda": 0.5,
+      "mu": 0.5,
+      "dimension": 300
+    }
+  ]
+}

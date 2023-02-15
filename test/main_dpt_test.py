@@ -244,8 +244,8 @@ class Tester:
         for i in range(0, 20, 2):
             s1 = captions.values[i]
             s2 = captions.values[i + 1]
-            t1 = parse(s1, nlp=Tester.nlp, annotator=mode).replace('\r', '').replace('\t', ' ')
-            t2 = parse(s2, nlp=Tester.nlp, annotator=mode).replace('\r', '').replace('\t', ' ')
+            t1 = parse(s1, nlp=Tester.nlp, annotator=mode, tokens_as_leaves=False).replace('\r', '').replace('\t', ' ')
+            t2 = parse(s2, nlp=Tester.nlp, annotator=mode, tokens_as_leaves=False).replace('\r', '').replace('\t', ' ')
 
             test.append({"s1": t1, "s2": t2})
 
