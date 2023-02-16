@@ -12,7 +12,7 @@ import numpy as np
 import json
 import itertools
 import matplotlib.pyplot as plt
-
+from sklearn.metrics import mean_squared_error
 
 class PT_Kernel:
     __MAX_CHILDREN = 50
@@ -313,6 +313,18 @@ def test_kernel_and_explicit():
         res += c1 * c2
     print("exp: ", res)
 
+def test_kernel_and_dpt():
+    s1 = "(A (C (w1)) (D (w2) (w3) (w4)))"
+    s2 = "(B (D (w2) (w4)))"
+
+    t1, t2 = Tree(string=s1), Tree(string=s2)
+    kernel = PT_Kernel(LAMBDA=1, MU=1)
+    print("pt_kernel: ", kernel.kernel_similarity(t1, t2))
+
+    dpt_kernel = partialTreeKernel(dimension=8192, LAMBDA=1.0, operation=op.fast_shuffled_convolution)
+    print("dpt: ", np.dot(dpt_kernel.ds(t1), dpt_kernel.ds(t2)))
+
+
 
 def plot_results(df, mode, LAMBDA, MU, DIMENSION, threshold=None):
     if not os.path.exists('vis'):
@@ -322,8 +334,9 @@ def plot_results(df, mode, LAMBDA, MU, DIMENSION, threshold=None):
         if not os.path.exists(os.path.join('vis', t)):
             os.mkdir(os.path.join('vis', t))
 
-    #x = [x for x in range(0, len(df[(df["MU"] == MU) & (df["LAMBDA"] == LAMBDA) & (df["dimension"] == DIMENSION)]))]
+    preds = {}
     for t in ['_count', '_scaled']:
+        preds[t] = {}
         for o in ['original', 'dpt']:
             if threshold is not None:
                 y = df[(df["original_scaled"] > threshold) & (df["mode"] == mode) &
@@ -332,14 +345,20 @@ def plot_results(df, mode, LAMBDA, MU, DIMENSION, threshold=None):
                 y = df[(df["mode"] == mode) & (df["MU"] == MU) &
                        (df["LAMBDA"] == LAMBDA) & (df["dimension"] == DIMENSION)][o + t]
 
+            preds[t][o] = y
             if len(y)>100:
                 y = y[0:100]
 
             x = [i for i in range(0, len(y))]
             plt.plot(x, y, label=o + t)
+
+        mse = mean_squared_error(preds[t]['original'], preds[t]['dpt'])
+
         plt.legend()
         title = f"type{t}_mode_{mode}_mu_{MU}_lambda_{LAMBDA}_dim_{DIMENSION}"
+        suptitle = f"Mean squared error {str(round(mse, 6))}"
         plt.title(title)
+        plt.suptitle(suptitle)
         plt.savefig(os.path.join('vis', t, title+'.png'))
         plt.close()
 
@@ -350,6 +369,11 @@ if __name__ == "__main__":
         print("---------------------------------")
         print("KERNEL vs FRAGMENTS SPACE")
         test_kernel_and_explicit()
+        print("---------------------------------")
+    else:
+        print("---------------------------------")
+        print("KERNEL vs FRAGMENTS SPACE")
+        test_kernel_and_dpt()
         print("---------------------------------")
 
     params = [
@@ -411,7 +435,9 @@ if __name__ == "__main__":
 
         plot_results(df, mode, LAMBDA, MU, DIMENSION)
         print("---------------------------------")
-
+    
+    
+    
     # TODO
     # print(kernel.compute(t1, t2))
     # print("penalizing values ", [(k, kernel.dtf_cache[k][1]) for k in kernel.dtf_cache])
