@@ -53,7 +53,6 @@ class TreeKernel:
 
         for i in range(0, len(a.children)):
             if a.children[i].root != b.children[i].root:
-                print('Ciao')
                 return False
         return True
 
