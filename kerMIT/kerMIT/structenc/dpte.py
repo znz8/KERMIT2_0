@@ -174,7 +174,7 @@ class partialTreeKernel(DSE):
         if 'original' not in kwargs:
             raise Exception("dsf_with_weight(structure: Tree) cannot be correctly computed by itself for the Partial Tree Kernel!\nUse dsf_with_weight(structure: Tree, original:Tree) instead!")
 
-        original= kwargs['original']
+        original = kwargs['original']
         superTree = self.__findSuperTree(structure, original)
 
         if superTree is None:
@@ -188,7 +188,7 @@ class partialTreeKernel(DSE):
             result = np.dot(penalizing_value, self.distributedVector(structure.root))
         else:
             # The composition order is different from the one of the classic DTK, it is n#(c1#(c2#...#(cn-1#cn)...))
-            result, _ = self.dsf(structure.children[len(structure.children) - 1], original=superTree)
+            result = self.dsf(structure.children[len(structure.children) - 1], original=superTree)
             for i in range(len(structure.children) - 2, -1, -1):
                 result = self.operation(
                     self.dsf(structure.children[i], original=superTree),
@@ -196,11 +196,13 @@ class partialTreeKernel(DSE):
                 )
 
             penalizing_value = np.sqrt(self.LAMBDA) #TODO missing weight in that case
-            result = np.dot(penalizing_value, self.operation(self.distributedVector(structure.root),
-                                                             result)
-                            )
+            result = np.dot(penalizing_value, self.operation(self.distributedVector(structure.root), result))
 
-        return (result, penalizing_value)
+        n_nodes = len(list(structure.allNodes()))
+        missing_children = len(list(superTree.allNodes())) - n_nodes
+        weight = np.dot(np.power(self.mu(), missing_children), np.sqrt(np.power(self.LAMBDA, n_nodes)))
+
+        return (result, weight)
 
     def __findSuperTree(self, fragment: Tree, whole: Tree):
         if self.__isSuperTree(fragment, whole):
@@ -287,20 +289,17 @@ if __name__ == "__main__":
     s1 = "(NP (NP (DT A) (NN bunch)) (PP (IN of) (NP (NP (NNS trays)))))"
     s1 = s1.replace(")", ") ").replace("(", " (")
     t1 = Tree(string=s1)
-    print(t1)
-    kernel = partialTreeKernel(dimension=8192, LAMBDA=0.6, operation=op.fast_shuffled_convolution)
 
-    # test implementazione diretta con sum e implementazione come in Java
-    dt1 = kernel.ds(t1)
-    dt2 = kernel.ds(t1, store_substructures=True)
-    den = sum([dt1[i] * dt1[i] for i in range(0, len(dt1))]) * sum([dt2[i] * dt2[i] for i in range(0, len(dt1))])
-    print(sum([dt1[i] * dt2[i] for i in range(0, len(dt1))]) / sqrt(den))
+    encoder = partialTreeKernel(dimension=8192, LAMBDA=0.6, operation=op.fast_shuffled_convolution)
 
-    sub = "(NP (DT A) (NN bunch))"
+    dt1 = encoder.ds(t1, store_substructures=True)
+    print(dt1)
+
+    sub = "(NP (NN))"
     sub = sub.replace(")", ") ").replace("(", " (")
     subt = Tree(string=sub)
 
-    subdt, weight = kernel.dsf_with_weight(subt, original=t1)
+    subdt, weight = encoder.dsf_with_weight(subt, original=t1)
     print(subdt, weight)
 
 

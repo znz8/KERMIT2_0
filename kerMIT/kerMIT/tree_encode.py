@@ -51,6 +51,17 @@ def parse(text, nlp=None, **kwargs):
 
         if annotator == 'depparse':
             trees = []
+
+            annotations = []
+
+            tokens_as_leaves = False
+            if 'tokens_as_leaves' in kwargs:
+                tokens_as_leaves = kwargs['tokens_as_leaves']
+
+            informative_structure = False
+            if 'informative_structure' in kwargs:
+                informative_structure = kwargs['informative_structure']
+
             for i in range(len(sentences)):
                 dependencies = sentences[i]['basicDependencies']
                 tokens = sentences[i]['tokens']
@@ -62,16 +73,25 @@ def parse(text, nlp=None, **kwargs):
                 root = min([d['governor'] for d in dependencies])
                 parsing = ParseDependencies(root, dependencies, tokens, pos_tags=pos_tags)
 
-                tokens_as_leaves = False
-                if 'tokens_as_leaves' in kwargs:
-                    tokens_as_leaves = kwargs['tokens_as_leaves']
                 tree = parsing.tree(tokens_as_leaves=tokens_as_leaves)
                 trees.append(tree)
 
+                if informative_structure:
+                    annotations.append({'indices': parsing.idtree(), 'tokens':parsing.tokens})
+
             if len(sentences) == 1:
-                return str(trees[0])
+                if not informative_structure:
+                    return str(trees[0])
+                else:
+                    return str(trees[0]), {'indices': str(annotations[0]['indices']), 'tokens': annotations[0]['tokens']}
             else:
-                return str(Tree(root="ROOT", children=trees))
+                if not informative_structure:
+                    return str(Tree(root="ROOT", children=trees))
+                else:
+                    indices = [str(annotations[i]['indices']) for i in range(len(annotations))]
+                    tokens = [annotations[i]['tokens'] for i in range(len(annotations))]
+
+                    return [str(t) for t in trees],  {'indices': indices, 'tokens': tokens}
 
     except Exception as e:
         print("Exception occurred during parsing")
@@ -80,6 +100,8 @@ def parse(text, nlp=None, **kwargs):
             return '(S)'
         elif annotator == 'depparse':
             return '(ROOT)'
+
+
 
 class ParseDependencies:
     def __init__(self, root, dependencies, tokens, **kwargs):
@@ -125,6 +147,9 @@ class ParseDependencies:
         else:
             return self._rec_tree_with_tokens(self.root)
 
+    def idtree(self):
+        return self._rec_tree_with_id(self.root)
+
     def _rec_tree(self, root):
         if root in self.nodes:
             if not self._pos_tags:
@@ -167,13 +192,35 @@ class ParseDependencies:
 
         return tree
 
+    def _rec_tree_with_id(self, root):
+        tree = None
+        if root in self.nodes:
+            if not self._pos_tags:
+                tree = Tree(root=self.nodes[root]['label'], children=[Tree(root=str(root))])
+            else:
+                tree = Tree(root=self.nodes[root]['label'], children=[Tree(root=self.nodes[root]['pos'],
+                                                                           children=[Tree(root=str(root))])
+                                                                      ])
+            if len(self.adj[root]) > 0:
+                tree.children[0].children =[]
+                for child in self.adj[root]:
+                    tree.children[0].children.append(self._rec_tree_with_id(child))
+        else:
+            if root == self.root:
+                child = self.adj[root][0]
+                tree = self._rec_tree_with_id(child)
+            else:
+                raise Exception(f"Unkown node {root}")
+
+        return tree
 
 if __name__ == "__main__":
     nlp = StanfordCoreNLP('/stanford-corenlp-full-2018-10-05')
 
     text = "The cat is on the table"
-    tree_str = parse(text, nlp=nlp, annotator='depparse')
+    tree_str, annotations = parse(text, nlp=nlp, annotator='depparse', informative_structure=True)
     print(tree_str)
+    print(annotations)
 
 
     text = "The cat sleeps on the table"
