@@ -12,20 +12,92 @@ class SequenceKernel:
     def SequenceKernel(self, Lambda):
         self.LAMBDA = Lambda
 
-    def value(self, ):
-        return 0
+    def value(self, a, b):
+        self.map.clear()
+        sum = 0
+        bound = 0
 
-    def value(self, sx, t, n: int):
+        if self.bound == 0:
+            bound = min(len(a), len(b))
+        else:
+            bound = self.bound
+
+        for i in range(1, bound+1):
+            sum += self.values(a,b,i)
+
+        return sum
+
+
+    def values(self, sx, t, n: int):
         if len(sx) < n or len(t) < n:
             return 0
 
-        key = "0\t"+n+"\t"+hash(frozenset(str(t)))+"\t"+Arrays.hashCode(t)
+        key = "0\t"+str(n)+"\t"+str(hash(frozenset(str(sx))))+"\t"+str(hash(frozenset(str(t))))
 
-        return 9
+        if key in self.map:
+            return self.map[key]
+
+        s = sx[0:-1]
+        sum = self.values(s,t,n)
+        c = sx[-1]
+
+        for j in range(0, len(t)):
+            if t[j] == c:
+                sum += self.lambdaSq * self.K1(s, t[0:j], n-1)
+
+        self.map[key] = sum
+        return sum
 
 
-x = [1,2,3]
-y = 5
-z = 'ciao'
+    def K1(self, sx, t, n:int):
+        if n == 0:
+            return 1
 
-print(hash(frozenset(y)))
+        key = "1\t"+str(n)+"\t"+str(hash(frozenset(str(sx))))+"\t"+str(hash(frozenset(str(t))))
+
+        if key in self.map:
+            return self.map[key]
+
+        s = sx[0:-1]
+        sum = self.LAMBDA * self.K1(s,t,n) + self.K2(sx, t, n)
+        self.map[key] = sum
+
+        return sum
+
+    def K2(self, sx, tu, n:int):
+        if len(tu) < n or len(sx) < n:
+            return 0
+
+        key = "2\t"+str(n)+str(hash(frozenset(str(sx))))+"\t"+str(hash(frozenset(tu)))
+
+        if key in self.map:
+            return self.map[key]
+
+        t = tu[0:-1]
+        sum = self.LAMBDA * self.K2(sx, t, n)
+
+        if sx[-1] == tu[-1]:
+            s = sx[0:-1]
+            sum = sum + self.lambdaSq * self.K1(s,t, n-1)
+
+        map[key] = sum
+        return sum
+
+    def getLambda(self):
+        return self.LAMBDA
+
+    def setLambda(self, new_lambda):
+        self.LAMBDA = new_lambda
+        self.lambdaSq = new_lambda * new_lambda
+
+    def getBound(self):
+        return self.bound
+
+    def setBound(self, new_bound):
+        self.bound = new_bound
+
+SK = SequenceKernel()
+
+q = SK.value([1,2,3,4,5],[3,4,5,6,7,8])
+
+print(q)
