@@ -53,6 +53,9 @@ class SequenceKernel:
         if n == 0:
             return 1
 
+        if len(sx) < n or len(t) < n:
+            return 0
+
         key = "1\t"+str(n)+"\t"+str(hash(frozenset(str(sx))))+"\t"+str(hash(frozenset(str(t))))
 
         if key in self.map:
@@ -60,6 +63,7 @@ class SequenceKernel:
 
         s = sx[0:-1]
         sum = self.LAMBDA * self.K1(s,t,n) + self.K2(sx, t, n)
+
         self.map[key] = sum
 
         return sum
@@ -80,7 +84,7 @@ class SequenceKernel:
             s = sx[0:-1]
             sum = sum + self.lambdaSq * self.K1(s,t, n-1)
 
-        map[key] = sum
+        self.map[key] = sum
         return sum
 
     def getLambda(self):
@@ -98,6 +102,6 @@ class SequenceKernel:
 
 SK = SequenceKernel()
 
-q = SK.value([1,2,3,4,5],[3,4,5,6,7,8])
+#q = SK.value([1,2,3,4,5],[0,0,1,2,0])
 
-print(q)
+#print(q)
