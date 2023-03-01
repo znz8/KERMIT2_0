@@ -102,6 +102,6 @@ class SequenceKernel:
 
 SK = SequenceKernel()
 
-#q = SK.value([1,2,3,4,5],[0,0,1,2,0])
+value = SK.value([1,2,3,4,5,6],[0,2,0,0,3,4,0])
 
-#print(q)
+print(value)
