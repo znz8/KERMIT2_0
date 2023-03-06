@@ -342,16 +342,21 @@ def test_kernel_and_dpt(mode):
             res += c1 * c2
         print("exp: ", res)
 
-        datapath = "test/depparse/test_hans_dataset.csv"
+        datapath = "./depparse/test_hans_dataset.csv"
+        print("\n"+"*" * 10 + f" From {datapath} " + "*" * 10)
         if os.path.exists(datapath):
-            data = pd.read_csv("test/depparse/test_hans_dataset.csv").sample(n=50, random_state=19)
+            data = pd.read_csv(datapath).sample(n=1000, random_state=19)
 
             for i, row in data.iterrows():
                 s1, s2 = row['s1'], row['s2']
+                t1, t2 = Tree(string=s1), Tree(string=s2)
+
+                if len(list(t1.allNodes())) > 30 or len(list(t2.allNodes())) > 30:
+                    continue
+
                 print(s1)
                 print(s2)
 
-                t1, t2 = Tree(string=s1), Tree(string=s2)
                 kernel = ptkernel(LAMBDA=1, mu=1)
                 print("pt_kernel: ", kernel.kernel_similarity(t1, t2))
 
@@ -367,7 +372,7 @@ def test_kernel_and_dpt(mode):
                     c1 = sub_t1.count(t)
                     c2 = sub_t2.count(t)
                     res += c1 * c2
-                print("exp: ", res)
+                print("exp: ", res, '\n')
 
 def plot_results(df, mode, LAMBDA, MU, DIMENSION, threshold=None):
     if not os.path.exists('vis'):
@@ -408,16 +413,12 @@ def plot_results(df, mode, LAMBDA, MU, DIMENSION, threshold=None):
 
 if __name__ == "__main__":
     mode = "depparse"
-    if mode == "parse":
-        print("---------------------------------")
-        print("KERNEL vs FRAGMENTS SPACE")
-        test_kernel_and_explicit()
-        print("---------------------------------")
 
     print("---------------------------------")
     print("KERNEL vs FRAGMENTS SPACE")
     test_kernel_and_dpt(mode=mode)
     print("---------------------------------")
+
 
     params = [
         [1, 0.7, 0.6, 0.5],
