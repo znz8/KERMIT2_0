@@ -14,6 +14,9 @@ import itertools
 import matplotlib.pyplot as plt
 from sklearn.metrics import mean_squared_error
 
+from kernels.PartialTreeKernel import PartialTreeKernel as ptkernel
+
+
 class PT_Kernel:
     __MAX_CHILDREN = 50
     __MAX_RECURSION = 20
@@ -96,7 +99,7 @@ def test_in_original_space(input_file, output_path, DIMENSION: int = 8192, opera
     ss1 = input_sentences["s1"]
     ss2 = input_sentences["s2"]
 
-    kernel = partialTreeKernel(dimension=DIMENSION, LAMBDA=1, MU=1, operation=operation)
+    encoder = partialTreeKernel(dimension=DIMENSION, LAMBDA=1, MU=1, operation=operation)
     records = []
     for i in range(0, len(ss1)):
         s1, s2 = ss1[i], ss2[i]
@@ -109,8 +112,8 @@ def test_in_original_space(input_file, output_path, DIMENSION: int = 8192, opera
         print(t1)
         print(t2)
 
-        pdt1 = kernel.ds(t1)
-        pdt2 = kernel.ds(t2)
+        pdt1 = encoder.ds(t1)
+        pdt2 = encoder.ds(t2)
         print("PDT computed:")
         print("\t", pdt1)
         print("\t", pdt2)
@@ -122,8 +125,8 @@ def test_in_original_space(input_file, output_path, DIMENSION: int = 8192, opera
         record["dpt_count"] = count
         record["dpt_similarity"] = cosine
 
-        sub_t1 = kernel.substructures(t1)
-        sub_t2 = kernel.substructures(t2)
+        sub_t1 = encoder.substructures(t1)
+        sub_t2 = encoder.substructures(t2)
 
         tot = list(set(sub_t1) | set(sub_t2))
 
@@ -157,7 +160,7 @@ def test_with_kernel(input_file, output_path, mode, LAMBDA: float = 1., MU: floa
     ss2 = input_sentences["s2"]
 
     pt_encoder = partialTreeKernel(dimension=DIMENSION, LAMBDA=LAMBDA, MU=MU, operation=operation)
-    pt_kernel = PT_Kernel(LAMBDA=MU, MU=LAMBDA)
+    pt_kernel = ptkernel(LAMBDA=LAMBDA, mu=MU) #PT_Kernel(LAMBDA=MU, MU=LAMBDA)
 
     records = []
     if n is None:
@@ -298,7 +301,7 @@ def test_kernel_and_explicit():
     s1, s2 = s1.replace(")", ") ").replace("(", " ("), s2.replace(")", ") ").replace("(", " (")
     t1, t2 = Tree(string=s1), Tree(string=s2)
 
-    pt_kernel = PT_Kernel()
+    pt_kernel = ptkernel()
     print("pt kernel: ", pt_kernel.kernel_similarity(t1, t2))
 
     dpt_kernel = partialTreeKernel(dimension=8192, LAMBDA=1.0, operation=op.fast_shuffled_convolution)
@@ -318,7 +321,7 @@ def test_kernel_and_dpt():
     s2 = "(B (D (w2) (w4)))"
 
     t1, t2 = Tree(string=s1), Tree(string=s2)
-    kernel = PT_Kernel(LAMBDA=1, MU=1)
+    kernel = ptkernel(LAMBDA=1, mu=1)
     print("pt_kernel: ", kernel.kernel_similarity(t1, t2))
 
     dpt_kernel = partialTreeKernel(dimension=8192, LAMBDA=1.0, operation=op.fast_shuffled_convolution)

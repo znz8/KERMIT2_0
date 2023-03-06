@@ -12,6 +12,16 @@ class PartialTreeKernel:
         self.dPMatrix = dPMatrix
         self.nodeIndices = nodeIndices
 
+    def _clean_cache(self):
+        self.deltaMatrix = {}
+        self.deltaPMatrix = {}
+        self.dPMatrix = {}
+        self.nodeIndices = {}
+
+    def kernel_similarity(self, a: Tree, b: Tree):
+        self._clean_cache()
+        return self.value(a,b)
+
     def value(self, a: Tree, b: Tree):
         sum = 0
         for n in self.allNodes(a):
@@ -117,7 +127,7 @@ class PartialTreeKernel:
         return all
 
 
-albero = Tree(string="(A (C (w1)) (D (w2) (w3) (w4)))")
+"""albero = Tree(string="(A (C (w1)) (D (w2) (w3) (w4)))")
 albero2 = Tree(string="(B (D (w2) (w4)))")
 
 PTK = PartialTreeKernel()
@@ -125,4 +135,4 @@ PTK = PartialTreeKernel()
 q = PTK.value(albero, albero2)
 print(q)
 
-print(q/math.sqrt(PTK.value(albero, albero) * PTK.value(albero2, albero2)))
+print(q/math.sqrt(PTK.value(albero, albero) * PTK.value(albero2, albero2)))"""
