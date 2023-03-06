@@ -160,7 +160,7 @@ def test_with_kernel(input_file, output_path, mode, LAMBDA: float = 1., MU: floa
     ss2 = input_sentences["s2"]
 
     pt_encoder = partialTreeKernel(dimension=DIMENSION, LAMBDA=LAMBDA, MU=MU, operation=operation)
-    pt_kernel = ptkernel(LAMBDA=LAMBDA, mu=MU) #PT_Kernel(LAMBDA=MU, MU=LAMBDA)
+    pt_kernel = ptkernel(LAMBDA=MU, mu=LAMBDA) #PT_Kernel(LAMBDA=MU, MU=LAMBDA)
 
     records = []
     if n is None:
@@ -296,38 +296,78 @@ class Tester:
             pd.DataFrame(test).to_csv(output)
 
 
-def test_kernel_and_explicit():
-    s1, s2 = "(FRAG    (NP (NNP Bob))    (VP (VB read)      (NP (DT a) (NN message))))", "(FRAG    (NP (NNP Bob))    (VP (VB send)      (NP (DT a) (NN message))))"
-    s1, s2 = s1.replace(")", ") ").replace("(", " ("), s2.replace(")", ") ").replace("(", " (")
-    t1, t2 = Tree(string=s1), Tree(string=s2)
+def test_kernel_and_dpt(mode):
+    if mode == 'parse':
+        s1, s2 = "(FRAG    (NP (NNP Bob))    (VP (VB read)      (NP (DT a) (NN message))))", "(FRAG    (NP (NNP Bob))    (VP (VB send)      (NP (DT a) (NN message))))"
+        s1, s2 = s1.replace(")", ") ").replace("(", " ("), s2.replace(")", ") ").replace("(", " (")
+        t1, t2 = Tree(string=s1), Tree(string=s2)
 
-    pt_kernel = ptkernel()
-    print("pt kernel: ", pt_kernel.kernel_similarity(t1, t2))
+        pt_kernel = ptkernel()
+        print("pt kernel: ", pt_kernel.kernel_similarity(t1, t2))
 
-    dpt_kernel = partialTreeKernel(dimension=8192, LAMBDA=1.0, operation=op.fast_shuffled_convolution)
-    sub_t1 = dpt_kernel.substructures(t1)
-    sub_t2 = dpt_kernel.substructures(t2)
+        dpt_kernel = partialTreeKernel(dimension=8192, LAMBDA=1.0, operation=op.fast_shuffled_convolution)
+        sub_t1 = dpt_kernel.substructures(t1)
+        sub_t2 = dpt_kernel.substructures(t2)
 
-    res = 0
-    tot = set(sub_t1) & set(sub_t2)
-    for t in tot:
-        c1 = sub_t1.count(t)
-        c2 = sub_t2.count(t)
-        res += c1 * c2
-    print("exp: ", res)
+        res = 0
+        tot = set(sub_t1) & set(sub_t2)
+        for t in tot:
+            c1 = sub_t1.count(t)
+            c2 = sub_t2.count(t)
+            res += c1 * c2
+        print("exp: ", res)
 
-def test_kernel_and_dpt():
-    s1 = "(A (C (w1)) (D (w2) (w3) (w4)))"
-    s2 = "(B (D (w2) (w4)))"
+    if mode == 'depparse':
+        print("*"*10 + " Handcrafted " + "*"*10)
+        s1 = "(A (C (w1)) (D (w2) (w3) (w4)))"
+        s2 = "(B (D (w2) (w4)))"
+        print(s1)
+        print(s2)
 
-    t1, t2 = Tree(string=s1), Tree(string=s2)
-    kernel = ptkernel(LAMBDA=1, mu=1)
-    print("pt_kernel: ", kernel.kernel_similarity(t1, t2))
+        t1, t2 = Tree(string=s1), Tree(string=s2)
+        kernel = ptkernel(LAMBDA=1, mu=1)
+        print("pt_kernel: ", kernel.kernel_similarity(t1, t2))
 
-    dpt_kernel = partialTreeKernel(dimension=8192, LAMBDA=1.0, operation=op.fast_shuffled_convolution)
-    print("dpt: ", np.dot(dpt_kernel.ds(t1), dpt_kernel.ds(t2)))
+        dpt_kernel = partialTreeKernel(dimension=8192, LAMBDA=1.0, operation=op.fast_shuffled_convolution)
+        #print("dpt: ", np.dot(dpt_kernel.ds(t1), dpt_kernel.ds(t2)))
 
+        sub_t1 = dpt_kernel.substructures(t1)
+        sub_t2 = dpt_kernel.substructures(t2)
 
+        res = 0
+        tot = set(sub_t1) & set(sub_t2)
+        for t in tot:
+            c1 = sub_t1.count(t)
+            c2 = sub_t2.count(t)
+            res += c1 * c2
+        print("exp: ", res)
+
+        datapath = "test/depparse/test_hans_dataset.csv"
+        if os.path.exists(datapath):
+            data = pd.read_csv("test/depparse/test_hans_dataset.csv").sample(n=50, random_state=19)
+
+            for i, row in data.iterrows():
+                s1, s2 = row['s1'], row['s2']
+                print(s1)
+                print(s2)
+
+                t1, t2 = Tree(string=s1), Tree(string=s2)
+                kernel = ptkernel(LAMBDA=1, mu=1)
+                print("pt_kernel: ", kernel.kernel_similarity(t1, t2))
+
+                dpt_kernel = partialTreeKernel(dimension=8192, LAMBDA=1.0, operation=op.fast_shuffled_convolution)
+                # print("dpt: ", np.dot(dpt_kernel.ds(t1), dpt_kernel.ds(t2)))
+
+                sub_t1 = dpt_kernel.substructures(t1)
+                sub_t2 = dpt_kernel.substructures(t2)
+
+                res = 0
+                tot = set(sub_t1) & set(sub_t2)
+                for t in tot:
+                    c1 = sub_t1.count(t)
+                    c2 = sub_t2.count(t)
+                    res += c1 * c2
+                print("exp: ", res)
 
 def plot_results(df, mode, LAMBDA, MU, DIMENSION, threshold=None):
     if not os.path.exists('vis'):
@@ -373,11 +413,11 @@ if __name__ == "__main__":
         print("KERNEL vs FRAGMENTS SPACE")
         test_kernel_and_explicit()
         print("---------------------------------")
-    else:
-        print("---------------------------------")
-        print("KERNEL vs FRAGMENTS SPACE")
-        test_kernel_and_dpt()
-        print("---------------------------------")
+
+    print("---------------------------------")
+    print("KERNEL vs FRAGMENTS SPACE")
+    test_kernel_and_dpt(mode=mode)
+    print("---------------------------------")
 
     params = [
         [1, 0.7, 0.6, 0.5],
